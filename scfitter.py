@@ -25,11 +25,6 @@ mpl.rcParams['axes.formatter.limits'] = (-2, 2)
 
 HENE_RATIO = 9.650
 
-homedir = r"C:\Users\Romalis Group\Desktop\New Data"
-rawdir = os.path.join(homedir, 'Raw data')
-scdir = os.path.join(homedir, 'SC data')
-rundir = '0012'
-
 ddict = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[20, 500], nave=1)
 tdict = dict(dt=1e-3, mag=[0, 57], spins=[0, 57], roi=[0, 57], nave=1)
 
@@ -52,7 +47,7 @@ class SClist:
 
     """
 
-    def __init__(self, name):
+    def __init__(self, scdir, name):
         self.hene_ratio = HENE_RATIO
         self.name = name
         self.ext = '.scf'
