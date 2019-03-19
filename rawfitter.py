@@ -259,16 +259,13 @@ class RawFitter:
                'writetime': now.strftime('%Y-%m-%d %H:%M:%S'),
                'offset': self.offset}
 
-        wn = os.path.join(SCDIR, fname + '.scf')
+        wn = os.path.join(self.raw.scdir, fname + '.scf')
         f = open(wn, 'w')
         lst = deepcopy(self.blist)
         lst.append(hdr)
         json.dump(lst, f, default=default_json)
         f.close()
         return
-
-
-SCDIR = os.path.join(HOMEDIR, 'SC data')
 
 
 class RawBlock:

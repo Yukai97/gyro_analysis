@@ -18,7 +18,7 @@ mpl.rcParams['axes.unicode_minus'] = False
 
 HOMEDIR = r"C:\Users\Romalis Group\Desktop\New Data"
 RAWDIR = os.path.join(HOMEDIR, 'Raw data')
-
+RUNDIR = '0012'
 
 ddict = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[25, 500], nave=1)
 tdict = dict(dt=1e-3, mag=[0, 57], spins=[0, 57], roi=[0, 57], nave=1)

@@ -7,8 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import signal
 
-from gyro_analysis import ddict, ave_array, HOMEDIR, RAWDIR
-RUNDIR = '0012'
+from gyro_analysis import ddict, ave_array
 
 #todo: PEP 8 for package
 #todo: move rc params settings
@@ -16,8 +15,10 @@ RUNDIR = '0012'
 class RawData:
     # todo: get_data load: try except loadtxt; user input if fname absent
 
-    def __init__(self, filename=None, fdir=RUNDIR, hfile=ddict):
-        self.rawdir = RAWDIR
+    def __init__(self, homedir, rawdir, fdir, scdir, filename=None, hfile=ddict):
+        self.homedir = homedir
+        self.rawdir = rawdir
+        self.scdir = scdir
         self.fdir = fdir
         self.dir = os.path.join(self.rawdir, fdir)
         self.name = filename
