@@ -230,7 +230,7 @@ class SClist:
 
 #st = SClist(ft)
 #s2 = SClist(ft + 'c')
-sne = SClist(ft + 'ne')
+#sne = SClist(ft + 'ne')
 
 
 def plot_phase_res_psd(self, f, a, b):
