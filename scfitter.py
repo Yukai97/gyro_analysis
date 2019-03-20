@@ -244,25 +244,15 @@ class SClist:
         by.set_label_coords(-0.2, 0.5)
         return fig, ax, big_ax
 
-
-
-
-
-
-#st = SClist(ft)
-#s2 = SClist(ft + 'c')
-#sne = SClist(ft + 'ne')
-
-
-def plot_phase_res_psd(self, f, a, b):
-    rs = self.phase_res[f]
-    n = len(rs)
-    t = self.bl
-    x = np.linspace(0.0, n * t, n)
-    r = np.sin(a * 2.0 * np.pi * x) + 0.5 * np.sin(b * 2.0 * np.pi * x)
-    win = signal.hamming(n)
-    rf = fftpack.fft(r*win)
-    xf = np.linspace(0, 1.0/2/t, n/2)
-    fig, ax = plt.subplots()
-    ax.semilogy(xf[1:n//2], 2*np.abs(rf[1:n//2])/n)
-    return fig, ax
+    def plot_phase_res_psd(self, f, a, b):
+        rs = self.phase_res[f]
+        n = len(rs)
+        t = self.bl
+        x = np.linspace(0.0, n * t, n)
+        r = np.sin(a * 2.0 * np.pi * x) + 0.5 * np.sin(b * 2.0 * np.pi * x)
+        win = signal.hamming(n)
+        rf = fftpack.fft(r*win)
+        xf = np.linspace(0, 1.0/2/t, n/2)
+        fig, ax = plt.subplots()
+        ax.semilogy(xf[1:n//2], 2*np.abs(rf[1:n//2])/n)
+        return fig, ax
