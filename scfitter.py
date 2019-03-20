@@ -42,7 +42,12 @@ class SClist:
     Stores and manipulates a list of SCdat objects plus a header.
 
     SClist.l contains the list of SCdat objects one for each block
-    SClist.
+    SClist.amps, contains amplitudes for each signal
+    SClist.total_phases contains phases for each signal
+    SClist.res_phases contains phase residuals after fitting line to frequency
+    SClist.freqs,  contains freqs for each signal
+    SClist.init_phases, contains initial phase offset for each signal
+    SClist.phase(time) gives inferred phase at that time
 
 
     """
@@ -54,6 +59,7 @@ class SClist:
         self.path = scdir
         self.fullname = os.path.join(self.path, self.name + self.ext)
         with open(self.fullname, 'r') as read_data:
+            print('loading file:' + self.fullname)
             data = json.load(read_data)
         self.hdr = data[-1]
         self.l = data[:-1]
@@ -68,7 +74,11 @@ class SClist:
         self.total_phases = self.collect_total_phases()
         self.ne_corr = self.corrected_phases()
         self.fkeys.append('CP')
-        self.freqs, self.init_phases, self.phase_res = self.fit_phases()
+        fp = self.fit_phases()
+        self.freqs = fp[0][0]
+        self.freq_err = fp[0][1]
+        self.init_phases = fp[1][0]
+        self.res_phases = fp[2]
 
     def amp_phase(self):
         """
@@ -159,6 +169,9 @@ class SClist:
         fit_ph = {}
         res = {}
         t = self.time
+        ta = np.mean(t)
+        tq = np.sum((t-ta)**2)
+        na = len(t)
         bf = np.array([np.ones_like(t), t]).transpose()
         for f in self.fkeys:
             phases = self.total_phases[f]
@@ -168,10 +181,18 @@ class SClist:
             freq = lf['x'][1]
             initial_phase = lf['x'][0]
             r = phases - initial_phase - freq * t
-            fit_freqs[f] = freq
-            fit_ph[f] = initial_phase
+            fr_err = np.sqrt(np.sum(r**2)/(na-2)/tq)
+            fit_freqs[f] = [freq, fr_err]
+            fit_ph[f] = [initial_phase, np.NaN]
             res[f] = r
-        return fit_freqs, fit_ph, res
+
+        return [fit_freqs, fit_ph, res]
+
+    def phase(self, time):
+        ph_out = {}
+        for f in self.fkeys:
+            ph_out[f] = self.freqs[f]*time + self.init_phases[f]
+        return ph_out
 
     def plot_amp(self, fk):
         """
@@ -201,7 +222,7 @@ class SClist:
     def plot_phase_res(self):
         """ Plot Ne, He, corrected residuals after linear fit """
 
-        r = self.phase_res
+        r = self.res_phases
         t = self.time
         fig, ax = plt.subplots(3, 1, sharex=True)
         ax[0].plot(t, r['N'])

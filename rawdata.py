@@ -13,6 +13,15 @@ from gyro_analysis import ddict, ave_array
 #todo: move rc params settings
 
 class RawData:
+    """
+    Loads voltage data from the specified file. ddict contains parameters
+
+    example: ddict = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[20, 500], nave=1)
+    dt: time step between volatge records
+    mag: start and end time of magnetometer  # currently not used
+    spins: start and end time of spin precession  # currently not used
+    roi: region of interest to analyze
+    """
     # todo: get_data load: try except loadtxt; user input if fname absent
 
     def __init__(self, homedir, rawdir, fdir, scdir, filename=None, hfile=ddict):

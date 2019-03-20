@@ -8,12 +8,19 @@ from matplotlib import pyplot as plt
 from numpy.core.umath import sin, cos
 from scipy import optimize as opt, signal
 
-from gyro_analysis import rawdata, fN, default_freq, ave_array, HOMEDIR
+from gyro_analysis import rawdata, fN, default_freq, ave_array
 
 
 class RawFitter:
     """ Initialized with RawData object, length of blocks and frequencies to fit
     (He and Ne always included)
+
+    Fitting procedure:
+    1) Divide data into blocks of length block_length
+    2) Fit each segment to He & Ne amplitudes given a default He/Ne freqs
+    3) Use amps from (2) to find best individual frequency for each block
+    4) Use frequencies from (3) in a linear regression to find all amplitudes of interest
+     --> Xe and side-band frequencies determined from fitted (3) He/Ne frequencies
 
     RawFitter.fit_blocks() runs the block fit on the RawData
     RawFitter.blist contains list of the RawBlock objects resulting from the fit, one for each block
