@@ -74,11 +74,7 @@ class SClist:
         self.total_phases = self.collect_total_phases()
         self.ne_corr = self.corrected_phases()
         self.fkeys.append('CP')
-        fp = self.fit_phases()
-        self.freqs = fp[0][0]
-        self.freq_err = fp[0][1]
-        self.init_phases = fp[1][0]
-        self.res_phases = fp[2]
+        self.freqs, self.freq_err, self.init_phases, self.res_phases = self.fit_phases()
 
     def amp_phase(self):
         """
@@ -166,6 +162,7 @@ class SClist:
         :return:
         """
         fit_freqs = {}
+        freq_err = {}
         fit_ph = {}
         res = {}
         t = self.time
@@ -182,11 +179,11 @@ class SClist:
             initial_phase = lf['x'][0]
             r = phases - initial_phase - freq * t
             fr_err = np.sqrt(np.sum(r**2)/(na-2)/tq)
-            fit_freqs[f] = [freq, fr_err]
-            fit_ph[f] = [initial_phase, np.NaN]
+            fit_freqs[f] = freq
+            freq_err[f] = fr_err
+            fit_ph[f] = initial_phase
             res[f] = r
-
-        return [fit_freqs, fit_ph, res]
+        return [fit_freqs, freq_err, fit_ph, res]
 
     def phase(self, time):
         ph_out = {}
