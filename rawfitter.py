@@ -45,6 +45,7 @@ class RawFitter:
         self.time = self.time[:int(self.fit_span)]
         self.data, self.offset = self.remove_offset()
         self.res = np.zeros(int(self.fit_span))
+        self.r_squared = []
         # self.ind = [int(i * block_length * self.raw.fs) for i in range(self.nb)]
         self.p = np.arange(self.nb)
 
@@ -95,16 +96,24 @@ class RawFitter:
         return rd
 
     def fit_blocks(self):
+        r2_list = []
         for block in self.blist:
             s, e, dt = block.start, block.end, block.dt
             t0 = self.t0s(s, e)  # find phase relative to block start
             d0 = self.d0s(s, e)  # data, offset subtracted
             block = self.fit_seg(block)
             res = d0 - block.eval(t0)
+            ss_res = np.sum(res ** 2)
+            d0_mean = np.mean(d0)
+            ss_tot = np.sum((d0 - d0_mean) ** 2)
+            r_squared = 1 - ss_res/ss_tot
+            block.r_squared = r_squared
+            r2_list.append(r_squared)
             self.res[s:e] = res
             res_int = sum(res) * dt
             block.res_int = res_int
             ltime = self.raw.time_stamp
+        self.r_squared = r2_list
         return
 
     def fit_interval(self, start, end):
@@ -274,6 +283,22 @@ class RawFitter:
         f.close()
         return
 
+    def export_res(self, res_path, l = ''):
+
+        """
+        export residuals to files. The first row is time and the second row is res. 
+        """
+
+        fname = os.path.splitext(self.raw.name)[0]+l
+        full_path = os.path.join(res_path, fname + '.res')
+        t = self.time
+        res = self.res
+        np.savetxt(full_path, (t, res))
+        return
+        
+
+
+
 
 class RawBlock:
     """
@@ -299,6 +324,7 @@ class RawBlock:
         self.w = self.set_freqs_fund(wH, wN, wX, wC)  # set the fundamental frequencies to include in fit
         self.set_freqs_harm(wHarm)  # Add any harmonics of interest
         self.a, self.b = self.set_amps()
+        self.r_squared = None
         self.start, self.end, self.dt = None, None, None
         self.local_time = None
 
