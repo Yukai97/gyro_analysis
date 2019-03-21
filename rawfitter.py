@@ -238,6 +238,14 @@ class RawFitter:
         fig.show()
         return fig, ax
 
+    def plot_r_squared(self):
+        block_number = np.arange(len(self.blist)) + 1
+        r_squared = self.r_squared
+        plt.plot(block_number, r_squared)
+        plt.xlabel('block number')
+        plt.ylabel('$R^2$')
+        plt.show()
+
     def make_raw_psd(self, nseg=8):
         dat = self.raw.data
         ntot = len(dat)

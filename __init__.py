@@ -8,6 +8,8 @@ from numpy import pi
 # todo: make jupyter notebooks testing block-length dependence of fit
 # todo: look at fit to corrected phases
 
+__all__ = ['rawdata', 'rawfitter', 'scfitter']
+
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
 mpl.rcParams['savefig.dpi'] = 100
