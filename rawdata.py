@@ -123,7 +123,7 @@ class RawData:
         npts = 2 ** (np.floor(np.log2(ntot / nseg)))
         self.psd = signal.welch(self.data, fs, nperseg=npts)
 
-    def plot_psd(self, fig=None, ax=None):
+    def plot_psd(self, xlim=[0.1, 30], fig=None, ax=None):
         if not self.psd:
             self.make_psd(8)
 
@@ -134,7 +134,7 @@ class RawData:
         ax.set_ylabel('$\sqrt{V^2/Hz}$')
         ax.set_yscale('log')
         ax.set_xscale('log')
-        ax.set_xlim([0.1, 30])
+        ax.set_xlim(xlim)
         return fig, ax
 
 

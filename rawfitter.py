@@ -260,7 +260,7 @@ class RawFitter:
         npts = 2 ** (np.floor(np.log2(ntot / nseg)))
         return signal.welch(res, fs, nperseg=int(npts))
 
-    def plot_res_psd(self, nseg=8):
+    def plot_res_psd(self, xlim=[0.01, 30], nseg=8):
         psd = self.make_res_psd(nseg)
         fig, ax = plt.subplots()
         ax.plot(psd[0], np.sqrt(psd[1]))
@@ -268,7 +268,7 @@ class RawFitter:
         ax.set_ylabel('$\sqrt{V^2/Hz}$')
         ax.set_yscale('log')
         ax.set_xscale('log')
-        ax.set_xlim([0.01, 30])
+        ax.set_xlim(xlim)
         return fig, ax
 
     def write_json(self, l = ''):
