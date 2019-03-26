@@ -88,10 +88,10 @@ class RawFitter:
         start_mat = np.array([b.start for b in self.blist])
         return start_mat.reshape(-1)
 
-    def t0s(self, s, e):
+    def block_t_array(self, s, e):
         return self.raw.time[s:e] - self.raw.time[s]
 
-    def d0s(self, s, e):
+    def block_data(self, s, e):
         rd = self.data[s:e]
         return rd
 
@@ -99,20 +99,7 @@ class RawFitter:
         r2_list = []
         for block in self.blist:
             s, e, dt = block.start, block.end, block.dt
-            t0 = self.t0s(s, e)  # find phase relative to block start
-            d0 = self.d0s(s, e)  # data, offset subtracted
             block = self.fit_seg(block)
-            res = d0 - block.eval(t0)
-            ss_res = np.sum(res ** 2)
-            d0_mean = np.mean(d0)
-            ss_tot = np.sum((d0 - d0_mean) ** 2)
-            r_squared = 1 - ss_res/ss_tot
-            block.r_squared = r_squared
-            r2_list.append(r_squared)
-            self.res[s:e] = res
-            res_int = sum(res) * dt
-            block.res_int = res_int
-            ltime = self.raw.time_stamp
         self.r_squared = r2_list
         return
 
@@ -127,32 +114,24 @@ class RawFitter:
         seg = scdat_obj
         s, e = seg.start, seg.end
         wH, wN = seg.wH, seg.wN
-        a0 = self.fit_hx_amp_seg(s, e, wH, wN)
+        a0 = self.fit_amp_seg(s, e, [wH, wN])
         w0 = self.fit_freq_seg(s, e, *a0)
         seg.update_hene(w0)
         names = seg.names
         w1 = [seg.w[i] for i in names]
-        amps = self.fit_arb_amp_seg(s, e, w1).reshape(-1, 2)
+        amps = self.fit_amp_seg(s, e, w1).reshape(-1, 2)
         for i in range(len(names)):
             seg.a[names[i]] = amps[i][0]
             seg.b[names[i]] = amps[i][1]
         return seg
 
-    # fit He&Xe amplitudes of segment
-    def fit_hx_amp_seg(self, start, end, wH, wN):
-        """ define segment between start and end; hold wH and wN constant and find amplitudes """
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
-        bf0 = self.bf_hene(t0, wH, wN).transpose()
-        return opt.lsq_linear(bf0, d0)['x']
-
     # fit amplitudes of arbitrary frequencies
-    def fit_arb_amp_seg(self, start, end, freqs):
+    def fit_amp_seg(self, start, end, freqs):
         """ find sine and cosine amplitudes (nx2 array) of n freqs;  """
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
-        bf0 = self.bf_freqs(t0, freqs).transpose()
-        lf = opt.lsq_linear(bf0, d0, tol=1e-16)
+        t_arr = self.block_t_array(start, end)
+        bl_data = self.block_data(start, end)
+        bf0 = self.bf_freqs(t_arr, freqs).transpose()
+        lf = opt.lsq_linear(bf0, bl_data, tol=1e-16)
         if not lf['success']:
             raise RuntimeError('Fit of raw data to sine & cosine')
         return lf['x']
@@ -161,15 +140,15 @@ class RawFitter:
     def fit_freq_seg(self, start, end, asH, acH, asN, acN):
         """ """
         wH, wN = self.base_fit.wH, self.base_fit.wN
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t_arr = self.block_t_array(start, end)
+        bl_data = self.block_data(start, end)
         A0 = [asH, acH, asN, acN]
 
         def res(w, t, d, amps):
             para_dict = dict(aH=amps[0], bH=amps[1], aN=amps[2], bN=amps[3], wH=w[0], wN=w[1])
             return self.func_hene(t, para_dict) - d
 
-        return opt.least_squares(res, x0=[wH, wN], ftol=1e-12, args=(t0, d0, A0))['x']
+        return opt.least_squares(res, x0=[wH, wN], ftol=1e-12, args=(t_arr, bl_data, A0))['x']
 
     def func_hene(self, t, params):
         """ Returns a sin wt + b cos wt for a pair of frequencies  """
@@ -181,10 +160,6 @@ class RawFitter:
         wN = params['wN']
         return aH * sin(wH * t) + bH * cos(wH * t) + aN * sin(wN * t) + bN * cos(wN * t)
 
-    def bf_hene(self, t, wH, wN):
-        """ he & ne basis functions """
-        return np.array([sin(wH * t), cos(wH * t), sin(wN * t), cos(wN * t)])
-
     def bf_freqs(self, t, freqs):
         """ sin/cos basis functions from arbitrary list of frequencies """
         basis = []  # basis function
@@ -193,13 +168,31 @@ class RawFitter:
             basis.append(cos(w * t))
         return np.array(basis)
 
+    def get_res(self):
+        r2_list = []
+        for block in self.blist:
+            s, e, dt = block.start, block.end, block.dt
+            t_arr = self.block_t_array(s, e)  # find phase relative to block start
+            bl_data = self.block_data(s, e)  # data, offset subtracted
+            res = bl_data - block.eval(t_arr)
+            ss_res = np.sum(res ** 2)
+            bl_data_mean = np.mean(bl_data)
+            ss_tot = np.sum((bl_data - bl_data_mean) ** 2)
+            r_squared = 1 - ss_res/ss_tot
+            block.r_squared = r_squared
+            r2_list.append(r_squared)
+            self.res[s:e] = res
+            res_int = sum(res) * dt
+            block.res_int = res_int
+        self.r_squared = r2_list
+
     def plot_fit(self, ind):
         ind = ind  # self.get_index(time)
         bl = self.blist[ind]
         start = bl.start
         end = bl.end
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t0 = self.block_t_array(start, end)
+        d0 = self.block_data(start, end)
         f0 = bl.eval(t0)
         fig, ax = plt.subplots()
         ax.plot(t0 + self.time[start], d0, 'k.')
@@ -271,7 +264,7 @@ class RawFitter:
         ax.set_xlim(xlim)
         return fig, ax
 
-    def write_json(self, l = ''):
+    def write_json(self, l=''):
         "write blist (output of fit_blocks()) to a json file of same name as RawData file + l"
         fname = os.path.splitext(self.raw.name)[0]+l
         now = datetime.now()
@@ -291,10 +284,10 @@ class RawFitter:
         f.close()
         return
 
-    def export_res(self, res_path, l = ''):
+    def export_res(self, res_path, l=''):
 
         """
-        export residuals to files. The first row is time and the second row is res. 
+        export residuals to files. The first row is time and the second row is res.
         """
 
         fname = os.path.splitext(self.raw.name)[0]+l
@@ -303,12 +296,10 @@ class RawFitter:
         res = self.res
         np.savetxt(full_path, (t, res))
         return
-        
-
-
 
 
 class RawBlock:
+
     """
     Class storing data related to sine and cosine fit to the data
 
