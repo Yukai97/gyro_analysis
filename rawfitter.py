@@ -89,7 +89,7 @@ class RawFitter:
         return start_mat.reshape(-1)
 
     def block_t_array(self, s, e):
-        return self.raw.time[s:e] - self.raw.time[s]
+        return self.raw.time[s:e]
 
     def block_data(self, s, e):
         rd = self.data[s:e]
@@ -114,23 +114,24 @@ class RawFitter:
         seg = scdat_obj
         s, e = seg.start, seg.end
         wH, wN = seg.wH, seg.wN
-        a0 = self.fit_amp_seg(s, e, [wH, wN])
-        w0 = self.fit_freq_seg(s, e, *a0)
-        seg.update_hene(w0)
         names = seg.names
+        w0 = [seg.w[i] for i in names]
+        a0 = self.fit_amp_seg(s, e, [wH, wN], [wH, wN])
+        w = self.fit_freq_seg(s, e, *a0)
+        seg.update_hene(w)
         w1 = [seg.w[i] for i in names]
-        amps = self.fit_amp_seg(s, e, w1).reshape(-1, 2)
+        amps = self.fit_amp_seg(s, e, w1, w0).reshape(-1, 2)
         for i in range(len(names)):
             seg.a[names[i]] = amps[i][0]
             seg.b[names[i]] = amps[i][1]
         return seg
 
     # fit amplitudes of arbitrary frequencies
-    def fit_amp_seg(self, start, end, freqs):
+    def fit_amp_seg(self, start, end, freqs, freqs0):
         """ find sine and cosine amplitudes (nx2 array) of n freqs;  """
         t_arr = self.block_t_array(start, end)
         bl_data = self.block_data(start, end)
-        bf0 = self.bf_freqs(t_arr, freqs).transpose()
+        bf0 = self.bf_freqs(t_arr, freqs, freqs0).transpose()
         lf = opt.lsq_linear(bf0, bl_data, tol=1e-16)
         if not lf['success']:
             raise RuntimeError('Fit of raw data to sine & cosine')
@@ -143,14 +144,15 @@ class RawFitter:
         t_arr = self.block_t_array(start, end)
         bl_data = self.block_data(start, end)
         A0 = [asH, acH, asN, acN]
+        freqs = [wH, wN]
 
         def res(w, t, d, amps):
             para_dict = dict(aH=amps[0], bH=amps[1], aN=amps[2], bN=amps[3], wH=w[0], wN=w[1])
-            return self.func_hene(t, para_dict) - d
+            return self.func_hene(t, freqs, para_dict) - d
 
         return opt.least_squares(res, x0=[wH, wN], ftol=1e-12, args=(t_arr, bl_data, A0))['x']
 
-    def func_hene(self, t, params):
+    def func_hene(self, t, freqs, params):
         """ Returns a sin wt + b cos wt for a pair of frequencies  """
         aH = params['aH']
         bH = params['bH']
@@ -158,14 +160,16 @@ class RawFitter:
         aN = params['aN']
         bN = params['bN']
         wN = params['wN']
-        return aH * sin(wH * t) + bH * cos(wH * t) + aN * sin(wN * t) + bN * cos(wN * t)
+        wH0 = freqs[0]
+        wN0 = freqs[1]
+        return aH * sin(wH * t - wH0 * t[0]) + bH * cos(wH * t - wH0 * t[0]) + aN*sin(wN*t-wN0*t) + bN*cos(wN*t-wN0*t[0])
 
-    def bf_freqs(self, t, freqs):
+    def bf_freqs(self, t, freqs, freqs0):
         """ sin/cos basis functions from arbitrary list of frequencies """
         basis = []  # basis function
-        for w in freqs:
-            basis.append(sin(w * t))
-            basis.append(cos(w * t))
+        for i in range(len(freqs)):
+            basis.append(sin(freqs[i] * t - freqs0[i] * t[0]))
+            basis.append(cos(freqs[i] * t - freqs0[i] * t[0]))
         return np.array(basis)
 
     def get_res(self):
@@ -174,6 +178,8 @@ class RawFitter:
             s, e, dt = block.start, block.end, block.dt
             t_arr = self.block_t_array(s, e)  # find phase relative to block start
             bl_data = self.block_data(s, e)  # data, offset subtracted
+
+            # R-squared
             res = bl_data - block.eval(t_arr)
             ss_res = np.sum(res ** 2)
             bl_data_mean = np.mean(bl_data)
@@ -181,6 +187,9 @@ class RawFitter:
             r_squared = 1 - ss_res/ss_tot
             block.r_squared = r_squared
             r2_list.append(r_squared)
+
+            # Chi-squared
+            
             self.res[s:e] = res
             res_int = sum(res) * dt
             block.res_int = res_int
@@ -321,6 +330,7 @@ class RawBlock:
         self.xene_ratio = self.hene_ratio / self.hexe_ratio
         self.fund = ['H', 'N', 'X', 'C']  # fundamental frequencies
         self.w = self.set_freqs_fund(wH, wN, wX, wC)  # set the fundamental frequencies to include in fit
+        self.w0 = self.w
         self.set_freqs_harm(wHarm)  # Add any harmonics of interest
         self.a, self.b = self.set_amps()
         self.r_squared = None
