@@ -96,10 +96,20 @@ class RawFitter:
         return rd
 
     def fit_blocks(self):
+        """ Loop over blccks, fitting each block """
         r2_list = []
         for block in self.blist:
             s, e, dt = block.start, block.end, block.dt
-            block = self.fit_seg(block)
+            t_arr = self.block_t_array(s, e)
+            bl_data = self.block_data(s, e)
+            block = self.fit_seg(block)  # Run fit routine on the block
+            res = bl_data - block.eval(t_arr)
+            r_squared = self.get_r_squared(res, bl_data)
+            r2_list.append(r_squared)
+            res_int = sum(res)*dt
+            self.res[s:e] = res
+            block.r_squared = r_squared
+            block.res_int = res_int
         self.r_squared = r2_list
         return
 
@@ -111,27 +121,33 @@ class RawFitter:
         return dob
 
     def fit_seg(self, scdat_obj):
+        """ Fit the block to sine and cosine functions
+
+        1) Find He&Ne initial amplitudes (a0) using initial frequency guess
+        2) Find He/Ne frequencies for this block using He/Ne amplitudes (a0)
+        3) Find all amplitudes using He/Ne frequencies for this block
+        """
         seg = scdat_obj
         s, e = seg.start, seg.end
         wH, wN = seg.wH, seg.wN
         names = seg.names
-        w0 = [seg.w[i] for i in names]
-        a0 = self.fit_amp_seg(s, e, [wH, wN], [wH, wN])
-        w = self.fit_freq_seg(s, e, *a0)
+        w_guess = [seg.w_guess[i] for i in names]
+        a0 = self.fit_amp_seg(s, e, [wH, wN], [wH, wN])  # find initial amplitudes
+        w = self.fit_freq_seg(s, e, *a0)  # find H/N block frequencies
         seg.update_hene(w)
-        w1 = [seg.w[i] for i in names]
-        amps = self.fit_amp_seg(s, e, w1, w0).reshape(-1, 2)
-        for i in range(len(names)):
+        w1 = [seg.w[i] for i in names]  # compute all frequencies for block
+        amps = self.fit_amp_seg(s, e, w1, w_guess).reshape(-1, 2)   # find all amplitudes for block
+        for i in range(len(names)):  # update block with fitted amplitudes
             seg.a[names[i]] = amps[i][0]
             seg.b[names[i]] = amps[i][1]
         return seg
 
     # fit amplitudes of arbitrary frequencies
-    def fit_amp_seg(self, start, end, freqs, freqs0):
-        """ find sine and cosine amplitudes (nx2 array) of n freqs;  """
+    def fit_amp_seg(self, start, end, freqs, freqs_guess):
+        """ find sine and cosine amplitudes (nx2 array) of n freqs from linear fit  """
         t_arr = self.block_t_array(start, end)
         bl_data = self.block_data(start, end)
-        bf0 = self.bf_freqs(t_arr, freqs, freqs0).transpose()
+        bf0 = self.bf_freqs(t_arr, freqs, freqs_guess).transpose()
         lf = opt.lsq_linear(bf0, bl_data, tol=1e-16)
         if not lf['success']:
             raise RuntimeError('Fit of raw data to sine & cosine')
@@ -142,17 +158,17 @@ class RawFitter:
         """ """
         wH, wN = self.base_fit.wH, self.base_fit.wN
         t_arr = self.block_t_array(start, end)
+        t_arr = t_arr - t_arr[0]
         bl_data = self.block_data(start, end)
         A0 = [asH, acH, asN, acN]
-        freqs = [wH, wN]
 
-        def res(w, t, d, amps):
+        def res(w, t, d, amps, freqs_guess):
             para_dict = dict(aH=amps[0], bH=amps[1], aN=amps[2], bN=amps[3], wH=w[0], wN=w[1])
-            return self.func_hene(t, freqs, para_dict) - d
+            return self.func_hene(t, freqs_guess, para_dict) - d
 
-        return opt.least_squares(res, x0=[wH, wN], ftol=1e-12, args=(t_arr, bl_data, A0))['x']
+        return opt.least_squares(res, x0=[wH, wN], ftol=1e-12, args=(t_arr, bl_data, A0, [wH, wN]))['x']
 
-    def func_hene(self, t, freqs, params):
+    def func_hene(self, t, freqs_guess, params):
         """ Returns a sin wt + b cos wt for a pair of frequencies  """
         aH = params['aH']
         bH = params['bH']
@@ -160,40 +176,24 @@ class RawFitter:
         aN = params['aN']
         bN = params['bN']
         wN = params['wN']
-        wH0 = freqs[0]
-        wN0 = freqs[1]
-        return aH * sin(wH * t - wH0 * t[0]) + bH * cos(wH * t - wH0 * t[0]) + aN*sin(wN*t-wN0*t) + bN*cos(wN*t-wN0*t[0])
+        wH0 = freqs_guess[0]
+        wN0 = freqs_guess[1]
+        return aH * sin(wH * t - wH0*t[0]) + bH * cos(wH * t - wH0*t[0]) + aN*sin(wN*t-wN0*t[0])+bN*cos(wN*t-wN0*t[0])
 
-    def bf_freqs(self, t, freqs, freqs0):
+    def bf_freqs(self, t, freqs, freqs_guess):
         """ sin/cos basis functions from arbitrary list of frequencies """
         basis = []  # basis function
         for i in range(len(freqs)):
-            basis.append(sin(freqs[i] * t - freqs0[i] * t[0]))
-            basis.append(cos(freqs[i] * t - freqs0[i] * t[0]))
+            basis.append(sin(freqs[i] * t - freqs_guess[i] * t[0]))
+            basis.append(cos(freqs[i] * t - freqs_guess[i] * t[0]))
         return np.array(basis)
 
-    def get_res(self):
-        r2_list = []
-        for block in self.blist:
-            s, e, dt = block.start, block.end, block.dt
-            t_arr = self.block_t_array(s, e)  # find phase relative to block start
-            bl_data = self.block_data(s, e)  # data, offset subtracted
-
-            # R-squared
-            res = bl_data - block.eval(t_arr)
-            ss_res = np.sum(res ** 2)
-            bl_data_mean = np.mean(bl_data)
-            ss_tot = np.sum((bl_data - bl_data_mean) ** 2)
-            r_squared = 1 - ss_res/ss_tot
-            block.r_squared = r_squared
-            r2_list.append(r_squared)
-
-            # Chi-squared
-            
-            self.res[s:e] = res
-            res_int = sum(res) * dt
-            block.res_int = res_int
-        self.r_squared = r2_list
+    def get_r_squared(self, res, block_data):
+        ss_res = np.sum(res**2)
+        block_data_mean = np.mean(block_data)
+        ss_tot = np.sum((block_data - block_data_mean) ** 2)
+        r_squared = 1 - ss_res/ss_tot
+        return r_squared
 
     def plot_fit(self, ind):
         ind = ind  # self.get_index(time)
@@ -204,8 +204,8 @@ class RawFitter:
         d0 = self.block_data(start, end)
         f0 = bl.eval(t0)
         fig, ax = plt.subplots()
-        ax.plot(t0 + self.time[start], d0, 'k.')
-        ax.plot(t0 + self.time[start], f0, 'b')
+        ax.plot(t0, d0, 'k.')
+        ax.plot(t0, f0, 'b')
         ax.set_xlabel('time [s]')
         ax.set_ylabel('signal [V]')
         fig.show()
@@ -274,7 +274,7 @@ class RawFitter:
         return fig, ax
 
     def write_json(self, l=''):
-        "write blist (output of fit_blocks()) to a json file of same name as RawData file + l"
+        """write blist (output of fit_blocks()) to a json file of same name as RawData file + l"""
         fname = os.path.splitext(self.raw.name)[0]+l
         now = datetime.now()
         def default_json(o):
@@ -330,7 +330,7 @@ class RawBlock:
         self.xene_ratio = self.hene_ratio / self.hexe_ratio
         self.fund = ['H', 'N', 'X', 'C']  # fundamental frequencies
         self.w = self.set_freqs_fund(wH, wN, wX, wC)  # set the fundamental frequencies to include in fit
-        self.w0 = self.w
+        self.w_guess = self.w
         self.set_freqs_harm(wHarm)  # Add any harmonics of interest
         self.a, self.b = self.set_amps()
         self.r_squared = None
@@ -394,8 +394,9 @@ class RawBlock:
     def eval(self, t):
         val = 0
         a, b, w = self.a, self.b, self.w
+        w_guess = self.w_guess
         for l in self.names:
-            val += a[l] * sin(w[l] * t) + b[l] * cos(w[l] * t)
+            val += a[l] * sin(w[l] * t - w_guess[l]*t[0]) + b[l] * cos(w[l] * t - w_guess[l]*t[0])
         return val
 
     def disp(self):
