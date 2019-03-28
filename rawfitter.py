@@ -28,7 +28,7 @@ class RawFitter:
 
     """
 
-    def __init__(self, rawdata: rawdata, block_length=4 / fN,
+    def __init__(self, rawdata: rawdata, block_length=6 / fN,
                  freqs2fit=['X', '0h3n']):
         """
 
@@ -88,31 +88,34 @@ class RawFitter:
         start_mat = np.array([b.start for b in self.blist])
         return start_mat.reshape(-1)
 
-    def t0s(self, s, e):
+    def block_time(self, s, e):
         return self.raw.time[s:e] - self.raw.time[s]
 
-    def d0s(self, s, e):
+    def block_data(self, s, e):
         rd = self.data[s:e]
         return rd
+
+    def get_r_squared(self, res, data):
+        ss_res = np.sum(res ** 2)
+        data_ave = np.mean(data)
+        ss_tot = np.sum((data - data_ave) ** 2)
+        r_squared = 1 - ss_res / ss_tot
+        return r_squared
 
     def fit_blocks(self):
         r2_list = []
         for block in self.blist:
             s, e, dt = block.start, block.end, block.dt
-            t0 = self.t0s(s, e)  # find phase relative to block start
-            d0 = self.d0s(s, e)  # data, offset subtracted
+            t = self.block_time(s, e)  # find phase relative to block start
+            data = self.block_data(s, e)  # data, offset subtracted
             block = self.fit_seg(block)
-            res = d0 - block.eval(t0)
-            ss_res = np.sum(res ** 2)
-            d0_mean = np.mean(d0)
-            ss_tot = np.sum((d0 - d0_mean) ** 2)
-            r_squared = 1 - ss_res/ss_tot
-            block.r_squared = r_squared
-            r2_list.append(r_squared)
-            self.res[s:e] = res
+            res = data - block.eval(t)
+            r_squared = self.get_r_squared(res, data)
             res_int = sum(res) * dt
+            self.res[s:e] = res
+            block.r_squared = r_squared
             block.res_int = res_int
-            ltime = self.raw.time_stamp
+            r2_list.append(r_squared)
         self.r_squared = r2_list
         return
 
@@ -141,16 +144,16 @@ class RawFitter:
     # fit He&Xe amplitudes of segment
     def fit_hx_amp_seg(self, start, end, wH, wN):
         """ define segment between start and end; hold wH and wN constant and find amplitudes """
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t0 = self.block_time(start, end)
+        d0 = self.block_data(start, end)
         bf0 = self.bf_hene(t0, wH, wN).transpose()
         return opt.lsq_linear(bf0, d0)['x']
 
     # fit amplitudes of arbitrary frequencies
     def fit_arb_amp_seg(self, start, end, freqs):
         """ find sine and cosine amplitudes (nx2 array) of n freqs;  """
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t0 = self.block_time(start, end)
+        d0 = self.block_data(start, end)
         bf0 = self.bf_freqs(t0, freqs).transpose()
         lf = opt.lsq_linear(bf0, d0, tol=1e-16)
         if not lf['success']:
@@ -161,8 +164,8 @@ class RawFitter:
     def fit_freq_seg(self, start, end, asH, acH, asN, acN):
         """ """
         wH, wN = self.base_fit.wH, self.base_fit.wN
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t0 = self.block_time(start, end)
+        d0 = self.block_data(start, end)
         A0 = [asH, acH, asN, acN]
 
         def res(w, t, d, amps):
@@ -198,8 +201,8 @@ class RawFitter:
         bl = self.blist[ind]
         start = bl.start
         end = bl.end
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t0 = self.block_time(start, end)
+        d0 = self.block_data(start, end)
         f0 = bl.eval(t0)
         fig, ax = plt.subplots()
         ax.plot(t0 + self.time[start], d0, 'k.')
