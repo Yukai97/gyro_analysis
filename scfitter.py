@@ -75,6 +75,7 @@ class SClist:
         self.ne_corr = self.corrected_phases()
         self.fkeys.append('CP')
         self.freqs, self.freq_err, self.init_phases, self.res_phases = self.fit_phases()
+        self.T2 = self.get_T2()
 
     def amp_phase(self):
         """
@@ -184,6 +185,26 @@ class SClist:
             fit_ph[f] = initial_phase
             res[f] = r
         return [fit_freqs, freq_err, fit_ph, res]
+
+    def get_T2(self):
+
+        """
+        get T2 of He, Ne and Xe
+        :return:
+        """
+
+        def exp_decay(t, a, b):
+            return a * np.exp(-t * b)
+
+        atoms = ['H', 'N', 'X']
+        initial_guess = {'H': [], 'N': [], 'X': []}
+        T2 = {}
+        for i in atoms:
+            amps = self.amps[i]
+            t = self.time
+            popt, pcov = curve_fit(exp_decay, t, amps, initial_guess[i])
+            T2[i] = 1/popt[1]
+        return T2
 
     def phase(self, time):
         ph_out = {}
