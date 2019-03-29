@@ -91,7 +91,7 @@ class SClist:
                 a = el['a'][f]
                 b = el['b'][f]
                 el['amp'][f] = np.sqrt(a ** 2 + b ** 2)
-                el['bp'][f] = (np.arctan2(a, b) + 2 * pi) % (2 * pi)
+                el['bp'][f] = np.arctan2(b, a)
         return
 
     def collect_block_phases(self):

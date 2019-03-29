@@ -28,7 +28,7 @@ class RawFitter:
 
     """
 
-    def __init__(self, rawdata: rawdata, block_length=4 / fN,
+    def __init__(self, rawdata: rawdata, block_length=6 / fN,
                  freqs2fit=['X', '0h3n']):
         """
 
@@ -45,7 +45,9 @@ class RawFitter:
         self.time = self.time[:int(self.fit_span)]
         self.data, self.offset = self.remove_offset()
         self.res = np.zeros(int(self.fit_span))
-        self.r_squared = []
+        self.r_squared = None  # defined in fit_blocks
+        self.res_int_list = None  # defined in fit_blocks
+        self.res_int = None  # defined in fit_blocks
         # self.ind = [int(i * block_length * self.raw.fs) for i in range(self.nb)]
         self.p = np.arange(self.nb)
 
@@ -88,40 +90,40 @@ class RawFitter:
         start_mat = np.array([b.start for b in self.blist])
         return start_mat.reshape(-1)
 
-    def t0s(self, s, e):
+    def block_time(self, s, e):
         return self.raw.time[s:e] - self.raw.time[s]
 
-    def d0s(self, s, e):
+    def block_data(self, s, e):
         rd = self.data[s:e]
         return rd
 
+    def get_r_squared(self, res, data):
+        ss_res = np.sum(res ** 2)
+        data_ave = np.mean(data)
+        ss_tot = np.sum((data - data_ave) ** 2)
+        r_squared = 1 - ss_res / ss_tot
+        return r_squared
+
     def fit_blocks(self):
         r2_list = []
+        res_int_list = []
         for block in self.blist:
             s, e, dt = block.start, block.end, block.dt
-            t0 = self.t0s(s, e)  # find phase relative to block start
-            d0 = self.d0s(s, e)  # data, offset subtracted
+            t = self.block_time(s, e)  # find phase relative to block start
+            data = self.block_data(s, e)  # data, offset subtracted
             block = self.fit_seg(block)
-            res = d0 - block.eval(t0)
-            ss_res = np.sum(res ** 2)
-            d0_mean = np.mean(d0)
-            ss_tot = np.sum((d0 - d0_mean) ** 2)
-            r_squared = 1 - ss_res/ss_tot
-            block.r_squared = r_squared
-            r2_list.append(r_squared)
-            self.res[s:e] = res
+            res = data - block.eval(t)
+            r_squared = self.get_r_squared(res, data)
             res_int = sum(res) * dt
+            self.res[s:e] = res
+            block.r_squared = r_squared
             block.res_int = res_int
-            ltime = self.raw.time_stamp
-        self.r_squared = r2_list
+            r2_list.append(r_squared)
+            res_int_list.append(res_int)
+        self.r_squared = np.array(r2_list)
+        self.res_int_list = np.array(res_int_list)
+        self.res_int = np.sum(res_int_list)
         return
-
-    def fit_interval(self, start, end):
-        dob = deepcopy(self.base_fit)
-        dob.start = start
-        dob.end = end
-        dob = self.fit_seg(dob)
-        return dob
 
     def fit_seg(self, scdat_obj):
         seg = scdat_obj
@@ -141,16 +143,16 @@ class RawFitter:
     # fit He&Xe amplitudes of segment
     def fit_hx_amp_seg(self, start, end, wH, wN):
         """ define segment between start and end; hold wH and wN constant and find amplitudes """
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t0 = self.block_time(start, end)
+        d0 = self.block_data(start, end)
         bf0 = self.bf_hene(t0, wH, wN).transpose()
         return opt.lsq_linear(bf0, d0)['x']
 
     # fit amplitudes of arbitrary frequencies
     def fit_arb_amp_seg(self, start, end, freqs):
         """ find sine and cosine amplitudes (nx2 array) of n freqs;  """
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t0 = self.block_time(start, end)
+        d0 = self.block_data(start, end)
         bf0 = self.bf_freqs(t0, freqs).transpose()
         lf = opt.lsq_linear(bf0, d0, tol=1e-16)
         if not lf['success']:
@@ -161,8 +163,8 @@ class RawFitter:
     def fit_freq_seg(self, start, end, asH, acH, asN, acN):
         """ """
         wH, wN = self.base_fit.wH, self.base_fit.wN
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t0 = self.block_time(start, end)
+        d0 = self.block_data(start, end)
         A0 = [asH, acH, asN, acN]
 
         def res(w, t, d, amps):
@@ -198,8 +200,8 @@ class RawFitter:
         bl = self.blist[ind]
         start = bl.start
         end = bl.end
-        t0 = self.t0s(start, end)
-        d0 = self.d0s(start, end)
+        t0 = self.block_time(start, end)
+        d0 = self.block_data(start, end)
         f0 = bl.eval(t0)
         fig, ax = plt.subplots()
         ax.plot(t0 + self.time[start], d0, 'k.')
@@ -239,7 +241,7 @@ class RawFitter:
         return fig, ax
 
     def plot_r_squared(self):
-        block_number = np.arange(len(self.blist)) + 1
+        block_number = np.arange(len(self.blist))
         r_squared = self.r_squared
         plt.plot(block_number, r_squared)
         plt.xlabel('block number')
@@ -272,6 +274,10 @@ class RawFitter:
         return fig, ax
 
     def write_json(self, l = ''):
+        # todo: Add the freqlist
+        # todo: Add the ddict
+        # todo: Add default freqs
+
         "write blist (output of fit_blocks()) to a json file of same name as RawData file + l"
         fname = os.path.splitext(self.raw.name)[0]+l
         now = datetime.now()
@@ -303,9 +309,6 @@ class RawFitter:
         res = self.res
         np.savetxt(full_path, (t, res))
         return
-        
-
-
 
 
 class RawBlock:
@@ -331,9 +334,14 @@ class RawBlock:
         self.fund = ['H', 'N', 'X', 'C']  # fundamental frequencies
         self.w = self.set_freqs_fund(wH, wN, wX, wC)  # set the fundamental frequencies to include in fit
         self.set_freqs_harm(wHarm)  # Add any harmonics of interest
-        self.a, self.b = self.set_amps()
+        init_amps = self.set_amps()
+        self.a = init_amps[0]
+        self.b = init_amps[1]
         self.r_squared = None
-        self.start, self.end, self.dt = None, None, None
+        self.res_int = None
+        self.start = None
+        self.end = None
+        self.dt = None
         self.local_time = None
 
     def set_freqs_fund(self, wH, wN, wX, wC):
