@@ -9,9 +9,6 @@ from scipy import signal
 
 from gyro_analysis import ddict, ave_array
 
-#todo: PEP 8 for package
-#todo: move rc params settings
-
 class RawData:
     """
     Loads voltage data from the specified file. ddict contains parameters

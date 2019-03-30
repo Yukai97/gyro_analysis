@@ -1,7 +1,6 @@
 import numpy as np
 from numpy import sin
 from numpy import cos
-from numpy import pi
 from scipy import signal
 from scipy import fftpack
 from scipy import optimize as opt
@@ -20,17 +19,6 @@ mpl.rcParams['axes.formatter.limits'] = (-2, 2)
 # mpl.rc('text', usetex=True)
 
 HENE_RATIO = 9.650
-
-ddict = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[20, 500], nave=1)
-tdict = dict(dt=1e-3, mag=[0, 57], spins=[0, 57], roi=[0, 57], nave=1)
-
-freqlist = ['X', '0h3n', '0h2n', '1h-2n', '1h2n', '1h-1n', '1h1n', '5n', '4n', '1.5n']
-default_freq = dict(wH=15.0148 * 2 * pi, wN=1.55606 * 2 * pi)
-fN = default_freq['wN'] / 2 / pi
-fH = default_freq['wH'] / 2 / pi
-df = default_freq
-
-ft = 'data_18-12-14_2132_005'
 
 
 class SClist:

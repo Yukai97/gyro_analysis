@@ -267,6 +267,7 @@ class RawFitter:
         "write blist (output of fit_blocks()) to a json file of same name as RawData file + l"
         fname = os.path.splitext(self.raw.name)[0]+l
         now = datetime.now()
+
         def default_json(o):
             return o.__dict__
 

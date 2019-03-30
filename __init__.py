@@ -6,9 +6,9 @@ from numpy import pi
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
 mpl.rcParams['savefig.dpi'] = 100
-mpl.rcParams['font.size'] = 40
+mpl.rcParams['font.size'] = 22
 mpl.rcParams['axes.unicode_minus'] = False
-# mpl.rc('font', **{'family': 'serif', 'serif': ['cmr10']})
+mpl.rc('font', **{'family': 'serif', 'serif': ['cmr10']})
 # mpl.rc('text', usetex=True)
 
 ddict = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[25, 500], nave=1)
