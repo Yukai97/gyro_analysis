@@ -38,6 +38,7 @@ class RawFitter:
         self.time = self.raw.time
         self.dt = self.raw.dt
         self.bl = block_length  # in seconds
+        self.freqs2fit = freqs2fit
         self.nb = int((rawdata.time[-1] - rawdata.time[0]) / block_length)
         self.base_fit = self.set_fitting_freqs(freqs2fit)
         self.blist = self.init_blocks()
@@ -261,10 +262,7 @@ class RawFitter:
         ax.set_xlim(xlim)
         return fig, ax
 
-    def write_json(self, l = ''):
-        # todo: Add the freqlist
-        # todo: Add the ddict
-        # todo: Add default freqs
+    def write_json(self, l=''):
 
         "write blist (output of fit_blocks()) to a json file of same name as RawData file + l"
         fname = os.path.splitext(self.raw.name)[0]+l
@@ -275,7 +273,8 @@ class RawFitter:
         hdr = {'name': fname, 'block_length': self.bl, 'dt': self.raw.dt,
                'runtime_stamp': str(self.raw.time_stamp),
                'writetime': now.strftime('%Y-%m-%d %H:%M:%S'),
-               'offset': self.offset}
+               'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.header,
+               'default_freq': default_freq}
 
         wn = os.path.join(self.raw.scdir, fname + '.scf')
         f = open(wn, 'w')

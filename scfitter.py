@@ -10,10 +10,6 @@ import matplotlib as mpl
 import os
 import json
 
-# todo:  FitData needs: start, end, dt, absolute start;  JSON dump.
-# todo:  Class operating on list of FitData JSON load
-from copy import deepcopy
-
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
 mpl.rcParams['savefig.dpi'] = 100

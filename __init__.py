@@ -3,11 +3,6 @@ import numpy as np
 import os
 from numpy import pi
 
-# todo: convert all visualization methods to plt_xxx
-# todo: documentation, info and dictionary keys + explanation & help methods
-# todo: make jupyter notebooks testing block-length dependence of fit
-# todo: look at fit to corrected phases
-
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
 mpl.rcParams['savefig.dpi'] = 100
