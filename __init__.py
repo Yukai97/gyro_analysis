@@ -29,8 +29,8 @@ def ave_array(arr_to_ave, npts):
     return np.mean(ashape, 1)
 
 
-__all__ = ['rawdata', 'rawfitter', 'scfitter', 'ddict', 'tdict', 'freqlist', 'default_freq', 'fN', 'fH', 'df',
-           'ave_array']
+__all__ = ['rawdata', 'rawfitter', 'scfitter', 'analyzer', 'ddict', 'tdict', 'freqlist', 'default_freq', 'fN', 'fH',
+           'df', 'ave_array']
 
 # class block_settings(block_length, nyquist_freq)
 

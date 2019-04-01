@@ -36,22 +36,25 @@ class SClist:
 
     """
 
-    def __init__(self, scdir, name):
+    def __init__(self, scdir, shotdir, name):
+        # todo: discuss end phases. end_time is not true end time
         self.hene_ratio = HENE_RATIO
         self.name = name
         self.ext = '.scf'
         self.path = scdir
+        self.shotdir = shotdir
         self.fullname = os.path.join(self.path, self.name + self.ext)
         with open(self.fullname, 'r') as read_data:
             print('loading file:' + self.fullname)
             data = json.load(read_data)
         self.hdr = data[-1]
         self.l = data[:-1]
-        self.keys = self.l[0].keys()
+        self.keys = list(self.l[0].keys())
         self.fkeys = list(self.l[0]['w'].keys())
         self.dt = self.l[0]['dt']
         self.amp_phase()
         self.time = np.array([i['start'] * self.dt for i in self.l])
+        self.end_time = self.l[-1]['end'] * self.dt
         self.amps = self.collect_amps()
         self.block_phases = self.collect_block_phases()
         self.bl = (self.l[0]['end'] - self.l[0]['start']) * self.dt
@@ -59,7 +62,8 @@ class SClist:
         self.ne_corr = self.corrected_phases()
         self.T2 = self.get_T2()
         self.fkeys.append('CP')
-        self.freqs, self.freq_err, self.init_phases, self.res_phases = self.fit_phases()
+        self.freqs, self.freq_err, self.init_phases, self.phase_res = self.fit_phases()
+        self.end_phases = self.get_end_phases()
 
     def amp_phase(self):
         """
@@ -190,8 +194,21 @@ class SClist:
             fit_freqs[f] = freq
             freq_err[f] = fr_err
             fit_ph[f] = initial_phase
-            res[f] = r
+            res[f] = list(r)
         return [fit_freqs, freq_err, fit_ph, res]
+
+    def get_end_phases(self):
+        """
+
+        :return:
+        """
+        end_ph = {}
+        for f in self.fkeys:
+            if f == 'X':
+                continue
+            else:
+                end_ph[f] = self.init_phases[f] + self.freqs[f] * self.end_time
+        return end_ph
 
     def phase(self, time):
         ph_out = {}
@@ -227,7 +244,7 @@ class SClist:
     def plot_phase_res(self):
         """ Plot Ne, He, corrected residuals after linear fit """
 
-        r = self.res_phases
+        r = self.phase_res
         t = self.time
         fig, ax = plt.subplots(3, 1, sharex=True)
         ax[0].plot(t, r['N'])
@@ -261,3 +278,20 @@ class SClist:
         fig, ax = plt.subplots()
         ax.semilogy(xf[1:n//2], 2*np.abs(rf[1:n//2])/n)
         return fig, ax
+
+    def write_json(self, l):
+        """
+        write blist (output of fit_blocks()) to a json file of same name as RawData file + l
+        """
+
+        file_name = self.name + l
+
+        file_path = os.path.join(self.shotdir, file_name + '.shd')
+        f = open(file_path, 'w')
+        output_dict = {'fkeys': self.fkeys, 'freqs': self.freqs, 'freq_err': self.freq_err,
+                       'phase_res': self.phase_res, 'T2': self.T2, 'amps': self.amps,
+                       'init_phases': self.init_phases, 'end_phases': self.end_phases}
+        json_output = json.dumps(output_dict)
+        f.write(json_output)
+        f.close()
+        return

@@ -29,7 +29,7 @@ class RawFitter:
     """
 
     def __init__(self, rawdata: rawdata, block_length=6 / fN,
-                 freqs2fit=['X', '0h3n']):
+                 freqs2fit=['X', '0h3n', '1h-2n', '1h2n', '1h-1n', '1h1n', '5n', '4n', '1.5n']):
         """
 
         :type rawdata: RawData class
@@ -210,7 +210,7 @@ class RawFitter:
         fig.show()
         return fig, ax
 
-    def plot_res_ave(self, ave_points = 30):
+    def plot_res_ave(self, ave_points=30):
         """
         average residuals by ave_points before plotting, to remove high-frequency component.
 
