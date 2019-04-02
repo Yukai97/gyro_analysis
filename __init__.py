@@ -29,5 +29,5 @@ def ave_array(arr_to_ave, npts):
     return np.mean(ashape, 1)
 
 
-__all__ = ['rawdata', 'rawfitter', 'scfitter', 'analyzer', 'shotinfo', 'ddict', 'tdict', 'freqlist', 'default_freq',
-           'fN', 'fH', 'df', 'ave_array']
+__all__ = ['rawdata', 'rawfitter', 'scfitter', 'analyzer', 'shotinfo', 'local_path', 'ddict', 'tdict', 'freqlist',
+           'default_freq', 'fN', 'fH', 'df', 'ave_array']

@@ -8,6 +8,7 @@ from scipy import signal
 
 from gyro_analysis import ddict, ave_array
 from gyro_analysis import shotinfo
+from gyro_analysis.local_path import *
 
 
 class RawData:
@@ -24,10 +25,11 @@ class RawData:
 
     def __init__(self, run_number, filename=None, fitting_paras=ddict):
         self.shotinfo = shotinfo.ShotInfo(filename, run_number)
+        self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
         self.name = filename
         self.ext = '.rdt'
         self.run_number = run_number
-        self.rawdir_run = os.path.join(self.shotinfo.rawdir, run_number)
+        self.rawdir_run = os.path.join(self.path['rawdir'], run_number)
         self.fitting_paras = fitting_paras  # eventually, make header files and use self.get_hdr(hfile)
         self.dt = self.fitting_paras['dt']
         self.fs = 1 / self.dt
@@ -35,6 +37,7 @@ class RawData:
         self.data = self.roi_data()
         self.nave = self.fitting_paras['nave']
         self.time = self.make_time()
+        self.timestamp = self.get_time_stamp()
         if self.nave > 1:
             self.ave_data()  # changes self.data, self.dt self.fs and self.time
         self.psd = None
@@ -49,6 +52,15 @@ class RawData:
     #         return hfile
     #         print('Need to learn to read header files')
     #         # todo: design header file format syntax and load here; ensure there is a dt term and roi term
+
+    def get_time_stamp(self):
+        if self.shotinfo.exists:
+            return self.shotinfo.timestamp
+        else:
+            full_file = os.path.join(self.rawdir_run, self.name + self.ext)
+            t = os.path.getctime(full_file)
+            tmptime = time.localtime(t)
+            return time.strftime('%Y-%m-%d', tmptime)
 
     # set up class instance
 
@@ -69,7 +81,7 @@ class RawData:
                 self.run_number = inp[0]
                 self.name = inp[1].split('.')[0]
                 self.ext = inp[1].split('.')[1]
-                self.rawdir_run = os.path.join(self.shotinfo.rawdir, self.run_number)
+                self.rawdir_run = os.path.join(self.path['rawdir'], self.run_number)
         if raw_data.ndim == 1:
             return raw_data
         else:

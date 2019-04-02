@@ -9,6 +9,7 @@ import matplotlib as mpl
 import os
 import json
 from gyro_analysis import shotinfo
+from gyro_analysis.local_path import *
 
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
@@ -43,8 +44,9 @@ class SClist:
         self.name = name
         self.ext = '.scf'
         self.shotinfo = shotinfo.ShotInfo(name, run_number)
-        self.scdir_run = os.path.join(self.shotinfo.scdir, run_number)
-        self.shotdir_run = os.path.join(self.shotinfo.shotdir, run_number)
+        self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
+        self.scdir_run = os.path.join(self.path['scdir'], run_number)
+        self.shotdir_run = os.path.join(self.path['shotdir'], run_number)
         self.fullname = os.path.join(self.scdir_run, self.name + self.ext)
         with open(self.fullname, 'r') as read_data:
             print('loading file:' + self.fullname)

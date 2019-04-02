@@ -35,6 +35,7 @@ class RawFitter:
         :type rawdata: RawData class
         """
         self.raw = deepcopy(rawdata)
+        self.path = self.raw.path
         self.shotinfo = self.raw.shotinfo
         self.time = self.raw.time
         self.dt = self.raw.dt
@@ -278,7 +279,7 @@ class RawFitter:
                'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.fitting_paras,
                'default_freq': default_freq}
 
-        scdir_run = os.path.join(self.shotinfo.scdir, self.raw.run_number)
+        scdir_run = os.path.join(self.path['scdir'], self.raw.run_number)
         if not os.path.isdir(scdir_run):
             os.makedirs(scdir_run)
         wn = os.path.join(scdir_run, fname + '.scf')
