@@ -274,7 +274,7 @@ class RawFitter:
             return o.__dict__
 
         hdr = {'name': fname, 'block_length': self.bl, 'dt': self.raw.dt,
-               'runtime_stamp': str(self.shotinfo.timestamp),
+               'runtime_stamp': str(self.raw.timestamp),
                'writetime': now.strftime('%Y-%m-%d %H:%M:%S'),
                'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.fitting_paras,
                'default_freq': default_freq}

@@ -38,12 +38,12 @@ class SClist:
 
     """
 
-    def __init__(self, name, run_number):
+    def __init__(self, run_number, name):
         # todo: discuss end phases. end_time is not true end time
         self.hene_ratio = HENE_RATIO
         self.name = name
         self.ext = '.scf'
-        self.shotinfo = shotinfo.ShotInfo(name, run_number)
+        self.shotinfo = shotinfo.ShotInfo(run_number, run_number)
         self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
         self.scdir_run = os.path.join(self.path['scdir'], run_number)
         self.shotdir_run = os.path.join(self.path['shotdir'], run_number)

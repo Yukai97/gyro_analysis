@@ -3,7 +3,7 @@ from gyro_analysis.local_path import *
 
 
 class ShotInfo:
-    def __init__(self, name, run_number):
+    def __init__(self, run_number, name):
         self.name = name
         self.ext = '.hdr'
         self.run_number = run_number
