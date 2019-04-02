@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import matplotlib as mpl
 import os
 import json
+from gyro_analysis import shotinfo
 
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
@@ -36,14 +37,15 @@ class SClist:
 
     """
 
-    def __init__(self, scdir, shotdir, name):
+    def __init__(self, name, run_number):
         # todo: discuss end phases. end_time is not true end time
         self.hene_ratio = HENE_RATIO
         self.name = name
         self.ext = '.scf'
-        self.path = scdir
-        self.shotdir = shotdir
-        self.fullname = os.path.join(self.path, self.name + self.ext)
+        self.shotinfo = shotinfo.ShotInfo(name, run_number)
+        self.scdir_run = os.path.join(self.shotinfo.scdir, run_number)
+        self.shotdir_run = os.path.join(self.shotinfo.shotdir, run_number)
+        self.fullname = os.path.join(self.scdir_run, self.name + self.ext)
         with open(self.fullname, 'r') as read_data:
             print('loading file:' + self.fullname)
             data = json.load(read_data)
@@ -281,16 +283,18 @@ class SClist:
 
     def write_json(self, l):
         """
-        write blist (output of fit_blocks()) to a json file of same name as RawData file + l
+
         """
 
         file_name = self.name + l
+        if not os.path.isdir(self.shotdir_run):
+            os.makedirs(self.shotdir_run)
 
-        file_path = os.path.join(self.shotdir, file_name + '.shd')
+        file_path = os.path.join(self.shotdir_run, file_name + '.shd')
         f = open(file_path, 'w')
-        output_dict = {'fkeys': self.fkeys, 'freqs': self.freqs, 'freq_err': self.freq_err,
-                       'phase_res': self.phase_res, 'T2': self.T2, 'amps': self.amps,
-                       'init_phases': self.init_phases, 'end_phases': self.end_phases}
+        output_dict = {'fkeys': self.fkeys, 'freqs': self.freqs, 'freq_err': self.freq_err, 'phase_res': self.phase_res,
+                       'T2': self.T2, 'amps': self.amps, 'init_phases': self.init_phases, 'end_phases': self.end_phases,
+                       'shotinfo': self.shotinfo.__dict__}
         json_output = json.dumps(output_dict)
         f.write(json_output)
         f.close()

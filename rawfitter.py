@@ -35,6 +35,7 @@ class RawFitter:
         :type rawdata: RawData class
         """
         self.raw = deepcopy(rawdata)
+        self.shotinfo = self.raw.shotinfo
         self.time = self.raw.time
         self.dt = self.raw.dt
         self.bl = block_length  # in seconds
@@ -272,12 +273,15 @@ class RawFitter:
             return o.__dict__
 
         hdr = {'name': fname, 'block_length': self.bl, 'dt': self.raw.dt,
-               'runtime_stamp': str(self.raw.time_stamp),
+               'runtime_stamp': str(self.shotinfo.timestamp),
                'writetime': now.strftime('%Y-%m-%d %H:%M:%S'),
-               'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.header,
+               'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.fitting_paras,
                'default_freq': default_freq}
 
-        wn = os.path.join(self.raw.scdir, fname + '.scf')
+        scdir_run = os.path.join(self.shotinfo.scdir, self.raw.run_number)
+        if not os.path.isdir(scdir_run):
+            os.makedirs(scdir_run)
+        wn = os.path.join(scdir_run, fname + '.scf')
         f = open(wn, 'w')
         lst = deepcopy(self.blist)
         lst.append(hdr)

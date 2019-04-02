@@ -29,28 +29,5 @@ def ave_array(arr_to_ave, npts):
     return np.mean(ashape, 1)
 
 
-__all__ = ['rawdata', 'rawfitter', 'scfitter', 'analyzer', 'ddict', 'tdict', 'freqlist', 'default_freq', 'fN', 'fH',
-           'df', 'ave_array']
-
-# class block_settings(block_length, nyquist_freq)
-
-# def fit_blocks(fname, dt=1e-3):
-#    data = np.loadtxt(currdir+fname)
-
-# if __name__ == "__main__":
-#     ff = 'data_18-12-14_2132_005.txt'
-#     r = RawData(filename=ff, hfile=ddict)
-#     b = SCfitter(r)
-#     b.fit_blocks()
-
-
-# fl = ['data_18-12-14_2132_005.txt',
-#       'data_18-12-14_2242_009.txt',
-#       'data_18-12-14_2318_011.txt',
-#       'data_18-12-15_0011_014.txt',
-#       'data_18-12-15_0104_017.txt',
-#       'data_18-12-15_0140_019.txt',
-#       'data_18-12-15_0157_020.txt',
-#       'data_18-12-15_0326_025.txt',
-#       'data_18-12-15_0716_038.txt',
-#       'data_18-12-15_1013_048.txt']
+__all__ = ['rawdata', 'rawfitter', 'scfitter', 'analyzer', 'shotinfo', 'ddict', 'tdict', 'freqlist', 'default_freq',
+           'fN', 'fH', 'df', 'ave_array']

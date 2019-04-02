@@ -6,14 +6,18 @@ import json
 
 class RunAnalyzer:
 
-    def __init__(self, shotdir, sclist):
-        self.sclist = sclist
-        self.shotdir = shotdir
-        self.file_list = sorted(os.listdir(self.shotdir))
-        self.run_number = os.path.basename(os.path.normpath(shotdir))
-        self.shot_number_str = [i.split('_')[1].split('.')[0] for i in self.file_list]
-        self.shot_number = np.array(list(map(int, self.shot_number_str)))
+    def __init__(self, run_number, sclist):
+        self.run_number = run_number
+        self.shotdir_run = os.path.join(sclist[0].shotinfo.shotdir, self.run_number)
+        self.file_list = sorted(os.listdir(self.shotdir_run))
         self.shot_data = self.collect_shot_data()
+        self.shot_number = [i['shotinfo']['shot_number'] for i in self.shot_data]
+        self.shot_number_int = list(map(int, self.shot_number))
+        self.waveform_config = [i['shotinfo']['waveform_config'] for i in self.shot_data]
+        self.he_angle = [i['shotinfo']['he_angle'] for i in self.shot_data]
+        self.ne_angle = [i['shotinfo']['ne_angle'] for i in self.shot_data]
+        self.xe_angle = [i['shotinfo']['xe_angle'] for i in self.shot_data]
+        self.timestamp = [i['shotinfo']['timestamp'] for i in self.shot_data]
         self.fkeys = self.shot_data[0]['fkeys']
         [freqs, freq_err] = self.collect_freqs_freqerr()
         self.freqs = freqs
@@ -26,7 +30,7 @@ class RunAnalyzer:
         file_list = self.file_list
         shot_data = []
         for i in range(len(file_list)):
-            file_path = os.path.join(self.shotdir, file_list[i])
+            file_path = os.path.join(self.shotdir_run, file_list[i])
             with open(file_path, 'r') as read_data:
                 print('loading file:' + file_path)
                 shot_data.append(json.load(read_data))
@@ -50,24 +54,22 @@ class RunAnalyzer:
     def collect_amps(self):
         amps = {}
         new_fkeys = list(set(self.fkeys) - set(['CP']))
-        print(new_fkeys)
         for f in new_fkeys:
-            print(f)
+            amps[f] = {}
             for i in range(len(self.shot_data)):
-                amps[f] = {}
-                amps[f][self.shot_number_str[i]] = np.array(self.shot_data[i]['amps'][f])
+                amps[f][self.shot_number[i]] = np.array(self.shot_data[i]['amps'][f])
         return amps
 
     def collect_phase_res(self):
         phase_res = {}
         for f in self.fkeys:
+            phase_res[f] = {}
             for i in range(len(self.shot_data)):
-                phase_res[f] = {}
-                phase_res[f][self.shot_number_str[i]] = np.array(self.shot_data[i]['phase_res'][f])
+                phase_res[f][self.shot_number[i]] = np.array(self.shot_data[i]['phase_res'][f])
         return phase_res
 
     def plot_t2(self):
-        shot_number = self.shot_number
+        shot_number = self.shot_number_int
         T2 = self.T2
 
         plt.figure(1)
@@ -90,7 +92,7 @@ class RunAnalyzer:
         plt.show()
 
     def plot_freqs(self):
-        shot_number = self.shot_number
+        shot_number = self.shot_number_int
         freqs = self.freqs
         freq_err = self.freq_err
 
@@ -117,14 +119,15 @@ class RunAnalyzer:
         plt.xlabel('shot number')
         plt.ylabel('$\omega_{Xe}$')
         plt.title('Run' + self.run_number)
+        plt.show()
 
     def plot_amps(self, a, b):
-        shot_number = self.shot_number
+        shot_number = self.shot_number_int
         amps = self.amps
 
-        he_amps = [np.mean(amps['H'][i][a:b]) for i in self.shot_number_str]
-        ne_amps = [np.mean(amps['N'][i][a:b]) for i in self.shot_number_str]
-        xe_amps = [np.mean(amps['X'][i][a:b]) for i in self.shot_number_str]
+        he_amps = [np.mean(amps['H'][i][a:b]) for i in self.shot_number]
+        ne_amps = [np.mean(amps['N'][i][a:b]) for i in self.shot_number]
+        xe_amps = [np.mean(amps['X'][i][a:b]) for i in self.shot_number]
 
         plt.figure()
         plt.plot(shot_number, he_amps, '-v', shot_number, ne_amps, '-^', shot_number, xe_amps, '-x')
@@ -132,10 +135,6 @@ class RunAnalyzer:
         plt.xlabel('shot number')
         plt.ylabel('Amplitude [V]')
         plt.show()
-
-
-
-
 
 
 
