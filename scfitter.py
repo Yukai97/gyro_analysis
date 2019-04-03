@@ -42,12 +42,15 @@ class SClist:
     Stores and manipulates a list of SCdat objects plus a header.
 
     SClist.l contains the list of SCdat objects one for each block
+    SClist.fkeys  contains a list of the species whose signals are being computed.
     SClist.amps, contains amplitudes for each signal
     SClist.total_phases contains phases for each signal
-    SClist.res_phases contains phase residuals after fitting line to frequency
-    SClist.freqs,  contains freqs for each signal
-    SClist.init_phases, contains initial phase offset for each signal
     SClist.phase(time) gives inferred phase at that time
+    SClist.fp (or freqs_and_phases) contains dict with keys:
+        'phase_start', 'phase_start_err', 'phase_end', 'phase_end_err'
+        'freq_start', 'freq_start_err', 'freq_end', 'freq_end_err'
+        Each value is a dict with frequencies.
+    SClist.res contains residuals 'res_start', 'res_end' for fits done with t_start = 0 or t_end = 0.
 
 
     """
@@ -74,7 +77,16 @@ class SClist:
         self.total_phases = self.collect_total_phases()
         self.ne_corr = self.corrected_phases()
         self.fkeys.append('CP')
-        self.freqs, self.freq_err, self.init_phases, self.res_phases = self.fit_phases()
+        freqs_and_phases, residuals = self.fit_phases()
+        self.freqs_and_phases = freqs_and_phases
+        self.fp = freqs_and_phases
+        self.res_dict = residuals
+        self.freqs = self.fp['freq_start']
+        self.freq_errs = self.fp['freq_start_err']
+        self.phase_start = self.fp['phase_start']
+        self.phase_end = self.fp['phase_end']
+        self.phase_errs = self.fp['phase_err']
+        self.residuals = self.res_dict['res_start']
 
     def amp_phase(self):
         """
@@ -157,33 +169,71 @@ class SClist:
 
     def fit_phases(self):
         """
+        Use linear regression to fit phases to a line (frequency), start phase and end phase.
+
+        Need two fits one for time t=0 at start, the other for time t0 at end, so that the phase
+        error is minimized at both the end and beginning of data.
+
+        variables ending in '1' are part of fit with t = 0,...,tn
+        variables ending in '2' are part of fit with t = -tn,...,0
 
 
-        :return:
+
+        :return: dictionary with frequencies (start/end), phases (start/end), errors and residuals
         """
-        fit_freqs = {}
-        freq_err = {}
-        fit_ph = {}
-        res = {}
-        t = self.time
-        ta = np.mean(t)
-        tq = np.sum((t-ta)**2)
-        na = len(t)
-        bf = np.array([np.ones_like(t), t]).transpose()
+
+        phase_start = {}
+        phase_start_err = {}
+        phase_end = {}
+        phase_end_err = {}
+        freq_start = {}
+        freq_start_err = {}
+        freq_end = {}
+        freq_end_err = {}
+        res_start = {}
+        res_end = {}
+
+        t1 = self.time
+        t2 = self.time-self.time[-1]  # renumber so last point is 0 to find phase at the end of the section
+        bf1 = np.array([np.ones_like(t1), t1]).transpose()
+        bf2 = np.array([np.ones_like(t2), t2]).transpose()
         for f in self.fkeys:
             phases = self.total_phases[f]
-            lf = opt.lsq_linear(bf, phases, tol=1e-16)
-            if not lf['success']:
+            lf1 = opt.lsq_linear(bf1, phases, tol=1e-16)
+            lf2 = opt.lsq_linear(bf2, phases, tol=1e-16)
+            if not lf1['success'] or not lf2['success']:
                 raise RuntimeError('Fit of phases to line did not converge')
-            freq = lf['x'][1]
-            initial_phase = lf['x'][0]
-            r = phases - initial_phase - freq * t
-            fr_err = np.sqrt(np.sum(r**2)/(na-2)/tq)
-            fit_freqs[f] = freq
-            freq_err[f] = fr_err
-            fit_ph[f] = initial_phase
-            res[f] = r
-        return [fit_freqs, freq_err, fit_ph, res]
+            r1 = lf1['fun']  # residual
+            r2 = lf2['fun']
+            err1 = self.calc_errors(r1, t1)
+            err2 = self.calc_errors(r2, t2)
+
+            phase_start[f] = lf1['x'][0]  # phase
+            phase_start_err[f] = err1[0]
+            phase_end[f] = lf2['x'][0]
+            phase_end_err[f] = err2[0]
+            freq_start[f] = lf1['x'][1]  # frequency
+            freq_start_err[f] = err1[1]
+            freq_end[f] = lf2['x'][1]
+            freq_end_err[f] = err2[1]
+            res_start[f] = r1
+            res_end[f] = r2
+        return [dict(phase_start=phase_start, phase_start_err=phase_start_err,
+                    phase_end=phase_end, phase_end_err=phase_start_err,
+                    freq_start=freq_start, freq_start_err=freq_start_err,
+                    freq_end=freq_start, freq_end_err=freq_start_err),
+                    dict(res_start=res_start, res_end=res_end)]
+
+    def calc_errors(self, res, times):
+        """ Compute errors on linear regression parameters from residuals """
+
+        t = times
+        ta = np.mean(t)
+        tq = np.sum((t-ta)**2)
+        n = len(t)
+        slope_err = np.sqrt(np.sum(res ** 2) / (n - 2) / tq)
+        intercept_err = slope_err * np.sqrt(np.sum(t ** 2) / n)
+        return intercept_err, slope_err
 
     def phase(self, time):
         ph_out = {}

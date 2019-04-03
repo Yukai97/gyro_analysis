@@ -24,14 +24,14 @@ class RawData:
     """
     # todo: get_data load: try except loadtxt; user input if fname absent
 
-    def __init__(self, homedir, rawdir, fdir, scdir, filename=None, hfile=ddict):
+    def __init__(self, homedir=None, rawdir=None, fdir=None, scdir=None, filename=None, file_dict=ddict):
         self.homedir = homedir
         self.rawdir = rawdir
         self.scdir = scdir
         self.fdir = fdir
         self.dir = os.path.join(self.rawdir, fdir)
         self.name = filename
-        self.header = hfile  # eventually, make header files and use self.get_hdr(hfile)
+        self.header = file_dict  # eventually, make header files and use self.get_hdr(hfile)
         self.dt = self.header['dt']
         self.fs = 1 / self.dt
         self.all_data = self.get_data()
