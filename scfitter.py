@@ -1,7 +1,6 @@
 import numpy as np
 from numpy import sin
 from numpy import cos
-from numpy import pi
 from scipy import signal
 from scipy import fftpack
 from scipy import optimize as opt
@@ -9,10 +8,8 @@ from matplotlib import pyplot as plt
 import matplotlib as mpl
 import os
 import json
-
-# todo:  FitData needs: start, end, dt, absolute start;  JSON dump.
-# todo:  Class operating on list of FitData JSON load
-from copy import deepcopy
+from gyro_analysis import shotinfo
+from gyro_analysis.local_path import *
 
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
@@ -25,17 +22,6 @@ mpl.rcParams['axes.formatter.limits'] = (-2, 2)
 
 HENE_RATIO = 9.650
 
-ddict = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[20, 500], nave=1)
-tdict = dict(dt=1e-3, mag=[0, 57], spins=[0, 57], roi=[0, 57], nave=1)
-
-freqlist = ['X', '0h3n', '0h2n', '1h-2n', '1h2n', '1h-1n', '1h1n', '5n', '4n', '1.5n']
-default_freq = dict(wH=15.0148 * 2 * pi, wN=1.55606 * 2 * pi)
-fN = default_freq['wN'] / 2 / pi
-fH = default_freq['wH'] / 2 / pi
-df = default_freq
-
-ft = 'data_18-12-14_2132_005'
-
 
 class SClist:
     """
@@ -45,7 +31,6 @@ class SClist:
     SClist.fkeys  contains a list of the species whose signals are being computed.
     SClist.amps, contains amplitudes for each signal
     SClist.total_phases contains phases for each signal
-    SClist.phase(time) gives inferred phase at that time
     SClist.fp (or freqs_and_phases) contains dict with keys:
         'phase_start', 'phase_start_err', 'phase_end', 'phase_end_err'
         'freq_start', 'freq_start_err', 'freq_end', 'freq_end_err'
@@ -55,27 +40,33 @@ class SClist:
 
     """
 
-    def __init__(self, scdir, name):
+    def __init__(self, run_number, name):
+        # todo: discuss end phases. end_time is not true end time
         self.hene_ratio = HENE_RATIO
         self.name = name
         self.ext = '.scf'
-        self.path = scdir
-        self.fullname = os.path.join(self.path, self.name + self.ext)
+        self.shotinfo = shotinfo.ShotInfo(run_number, name)
+        self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
+        self.scdir_run = os.path.join(self.path['scdir'], run_number)
+        self.shotdir_run = os.path.join(self.path['shotdir'], run_number)
+        self.fullname = os.path.join(self.scdir_run, self.name + self.ext)
         with open(self.fullname, 'r') as read_data:
             print('loading file:' + self.fullname)
             data = json.load(read_data)
         self.hdr = data[-1]
         self.l = data[:-1]
-        self.keys = self.l[0].keys()
+        self.keys = list(self.l[0].keys())
         self.fkeys = list(self.l[0]['w'].keys())
         self.dt = self.l[0]['dt']
         self.amp_phase()
         self.time = np.array([i['start'] * self.dt for i in self.l])
+        self.end_time = self.l[-1]['end'] * self.dt
         self.amps = self.collect_amps()
         self.block_phases = self.collect_block_phases()
         self.bl = (self.l[0]['end'] - self.l[0]['start']) * self.dt
         self.total_phases = self.collect_total_phases()
         self.ne_corr = self.corrected_phases()
+        self.T2 = self.fit_T2()
         self.fkeys.append('CP')
         freqs_and_phases, residuals = self.fit_phases()
         self.freqs_and_phases = freqs_and_phases
@@ -167,17 +158,29 @@ class SClist:
             self.l[i]['tp']['CP'] = corr_ne_ph[i]
         return corr_ne_ph
 
+    def fit_T2(self):
+        """get T2 of He, Ne and Xe"""
+        def exp_decay(t, a, b):
+            return a * np.exp(-t * b)
+
+        atoms = ['H', 'N', 'X']
+        initial_guess = {'H': [0.5, 0.0002], 'N': [0.8, 0.0001], 'X': [0.015, 0.02]}
+        T2 = {}
+        for i in atoms:
+            amps = self.amps[i]
+            t = self.time
+            popt, pcov = opt.curve_fit(exp_decay, t, amps, initial_guess[i])
+            T2[i] = 1/popt[1]
+        return T2
+
     def fit_phases(self):
-        """
-        Use linear regression to fit phases to a line (frequency), start phase and end phase.
+        """Use linear regression to fit phases to a line (frequency), start phase and end phase.
 
         Need two fits one for time t=0 at start, the other for time t0 at end, so that the phase
         error is minimized at both the end and beginning of data.
-
+        
         variables ending in '1' are part of fit with t = 0,...,tn
         variables ending in '2' are part of fit with t = -tn,...,0
-
-
 
         :return: dictionary with frequencies (start/end), phases (start/end), errors and residuals
         """
@@ -235,12 +238,6 @@ class SClist:
         intercept_err = slope_err * np.sqrt(np.sum(t ** 2) / n)
         return intercept_err, slope_err
 
-    def phase(self, time):
-        ph_out = {}
-        for f in self.fkeys:
-            ph_out[f] = self.freqs[f]*time + self.init_phases[f]
-        return ph_out
-
     def plot_amp(self, fk):
         """
 
@@ -269,7 +266,7 @@ class SClist:
     def plot_phase_res(self):
         """ Plot Ne, He, corrected residuals after linear fit """
 
-        r = self.res_phases
+        r = self.phase_res
         t = self.time
         fig, ax = plt.subplots(3, 1, sharex=True)
         ax[0].plot(t, r['N'])
@@ -303,3 +300,22 @@ class SClist:
         fig, ax = plt.subplots()
         ax.semilogy(xf[1:n//2], 2*np.abs(rf[1:n//2])/n)
         return fig, ax
+
+    def write_json(self, l):
+        """
+
+        """
+
+        file_name = self.name + l
+        if not os.path.isdir(self.shotdir_run):
+            os.makedirs(self.shotdir_run)
+
+        file_path = os.path.join(self.shotdir_run, file_name + '.shd')
+        f = open(file_path, 'w')
+        output_dict = {'fkeys': self.fkeys, 'freqs': self.freqs, 'freq_err': self.freq_err, 'phase_res': self.phase_res,
+                       'T2': self.T2, 'amps': self.amps, 'init_phases': self.init_phases, 'end_phases': self.end_phases,
+                       'block length': self.bl, 'shotinfo': self.shotinfo.__dict__}
+        json_output = json.dumps(output_dict)
+        f.write(json_output)
+        f.close()
+        return
