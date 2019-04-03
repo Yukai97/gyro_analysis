@@ -23,6 +23,7 @@ class RawData:
     """
     # todo: get_data load: try except loadtxt; user input if fname absent
 
+
     def __init__(self, run_number, filename=None, fitting_paras=ddict):
         self.shotinfo = shotinfo.ShotInfo(run_number, filename)
         self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
