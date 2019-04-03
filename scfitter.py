@@ -43,7 +43,7 @@ class SClist:
         self.hene_ratio = HENE_RATIO
         self.name = name
         self.ext = '.scf'
-        self.shotinfo = shotinfo.ShotInfo(run_number, run_number)
+        self.shotinfo = shotinfo.ShotInfo(run_number, name)
         self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
         self.scdir_run = os.path.join(self.path['scdir'], run_number)
         self.shotdir_run = os.path.join(self.path['shotdir'], run_number)
@@ -64,7 +64,7 @@ class SClist:
         self.bl = (self.l[0]['end'] - self.l[0]['start']) * self.dt
         self.total_phases = self.collect_total_phases()
         self.ne_corr = self.corrected_phases()
-        self.T2 = self.get_T2()
+        self.T2 = self.fit_T2()
         self.fkeys.append('CP')
         self.freqs, self.freq_err, self.init_phases, self.phase_res = self.fit_phases()
         self.end_phases = self.get_end_phases()
@@ -148,7 +148,7 @@ class SClist:
             self.l[i]['tp']['CP'] = corr_ne_ph[i]
         return corr_ne_ph
 
-    def get_T2(self):
+    def fit_T2(self):
 
         """
         get T2 of He, Ne and Xe
@@ -296,7 +296,7 @@ class SClist:
         f = open(file_path, 'w')
         output_dict = {'fkeys': self.fkeys, 'freqs': self.freqs, 'freq_err': self.freq_err, 'phase_res': self.phase_res,
                        'T2': self.T2, 'amps': self.amps, 'init_phases': self.init_phases, 'end_phases': self.end_phases,
-                       'timestamp': self.hdr['runtime_stamp'], 'shotinfo': self.shotinfo.__dict__}
+                       'block length': self.bl, 'shotinfo': self.shotinfo.__dict__}
         json_output = json.dumps(output_dict)
         f.write(json_output)
         f.close()

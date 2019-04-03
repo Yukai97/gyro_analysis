@@ -1,8 +1,15 @@
 import json
+import time
 from gyro_analysis.local_path import *
 
 
 class ShotInfo:
+    """Contain necessary information for a shot
+
+    Args:
+        run_number(str): specify the specific run
+        name(str): specify the specific shot
+    """
     def __init__(self, run_number, name):
         self.name = name
         self.ext = '.hdr'
@@ -15,6 +22,7 @@ class ShotInfo:
             self.exists = True
         except FileNotFoundError:
             self.exists = False
+            self.timestamp = self.get_timestamp()
         else:
             header = json.load(read_header)
             self.waveform_config = header['waveform_config']
@@ -24,4 +32,12 @@ class ShotInfo:
             self.xe_angle = header['xe_angle']
             self.timestamp = header['timestamp']
             read_header.close()
+
+    def get_timestamp(self):
+        rawdir_run = os.path.join(rawdir, self.run_number)
+        full_file = os.path.join(rawdir_run, self.name + '.rdt')
+        t = os.path.getctime(full_file)
+        tmptime = time.localtime(t)
+        return time.strftime('%Y-%m-%d', tmptime)
+
 

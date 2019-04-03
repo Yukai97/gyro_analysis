@@ -107,14 +107,14 @@ class RawFitter:
         r_squared = 1 - ss_res / ss_tot
         return r_squared
 
-    def fit_blocks(self):
+    def process_blocks(self):
         r2_list = []
         res_int_list = []
         for block in self.blist:
             s, e, dt = block.start, block.end, block.dt
             t = self.block_time(s, e)  # find phase relative to block start
             data = self.block_data(s, e)  # data, offset subtracted
-            block = self.fit_seg(block)
+            block = self.process_seg(block)
             res = data - block.eval(t)
             r_squared = self.get_r_squared(res, data)
             res_int = sum(res) * dt
@@ -128,7 +128,7 @@ class RawFitter:
         self.res_int = np.sum(res_int_list)
         return
 
-    def fit_seg(self, scdat_obj):
+    def process_seg(self, scdat_obj):
         seg = scdat_obj
         s, e = seg.start, seg.end
         wH, wN = seg.wH, seg.wN

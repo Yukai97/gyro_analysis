@@ -12,9 +12,9 @@ from gyro_analysis.local_path import *
 
 
 class RawData:
-    """
-    Loads voltage data from the specified file. ddict contains parameters
+    """Loads voltage data from the specified file.
 
+    ddict contains parameters
     example: ddict = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[20, 500], nave=1)
     dt: time step between volatge records
     mag: start and end time of magnetometer  # currently not used
@@ -33,11 +33,10 @@ class RawData:
         self.fitting_paras = fitting_paras  # eventually, make header files and use self.get_hdr(hfile)
         self.dt = self.fitting_paras['dt']
         self.fs = 1 / self.dt
-        self.all_data = self.get_data()
+        self.all_data = self.load_data()
         self.data = self.roi_data()
         self.nave = self.fitting_paras['nave']
         self.time = self.make_time()
-        self.timestamp = self.get_time_stamp()
         if self.nave > 1:
             self.ave_data()  # changes self.data, self.dt self.fs and self.time
         self.psd = None
@@ -53,18 +52,9 @@ class RawData:
     #         print('Need to learn to read header files')
     #         # todo: design header file format syntax and load here; ensure there is a dt term and roi term
 
-    def get_time_stamp(self):
-        if self.shotinfo.exists:
-            return self.shotinfo.timestamp
-        else:
-            full_file = os.path.join(self.rawdir_run, self.name + self.ext)
-            t = os.path.getctime(full_file)
-            tmptime = time.localtime(t)
-            return time.strftime('%Y-%m-%d', tmptime)
-
     # set up class instance
 
-    def get_data(self):
+    def load_data(self):
         while True:
             full_file = os.path.join(self.rawdir_run, self.name + self.ext)
             try:
