@@ -2,29 +2,38 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 import json
+from gyro_analysis.local_path import shotdir
 
 
 class RunAnalyzer:
 
     def __init__(self, run_number, sclist):
         self.run_number = run_number
-        self.shotdir_run = os.path.join(sclist[0].shotinfo.shotdir, self.run_number)
+        self.shotdir_run = os.path.join(shotdir, self.run_number)
         self.file_list = sorted(os.listdir(self.shotdir_run))
         self.shot_data = self.collect_shot_data()
-        self.shot_number = [i['shotinfo']['shot_number'] for i in self.shot_data]
-        self.shot_number_int = list(map(int, self.shot_number))
-        self.waveform_config = [i['shotinfo']['waveform_config'] for i in self.shot_data]
-        self.he_angle = [i['shotinfo']['he_angle'] for i in self.shot_data]
-        self.ne_angle = [i['shotinfo']['ne_angle'] for i in self.shot_data]
-        self.xe_angle = [i['shotinfo']['xe_angle'] for i in self.shot_data]
-        self.timestamp = [i['shotinfo']['timestamp'] for i in self.shot_data]
+        self.timestamp = [i['timestamp'] for i in self.shot_data]
+        self.flag = (self.shot_data[0]['shotinfo']['exists'] == 'True')
         self.fkeys = self.shot_data[0]['fkeys']
         [freqs, freq_err] = self.collect_freqs_freqerr()
         self.freqs = freqs
         self.freq_err = freq_err
+        self.T2 = self.collect_t2()
+        if self.flag:
+            self.shot_number = [i['shotinfo']['shot_number'] for i in self.shot_data]
+            self.shot_number_int = list(map(int, self.shot_number))
+            self.waveform_config = [i['shotinfo']['waveform_config'] for i in self.shot_data]
+            self.he_angle = [i['shotinfo']['he_angle'] for i in self.shot_data]
+            self.ne_angle = [i['shotinfo']['ne_angle'] for i in self.shot_data]
+            self.xe_angle = [i['shotinfo']['xe_angle'] for i in self.shot_data]
+        else:
+            self.shot_number = [i.split('.')[0].split('_')[1] for i in self.file_list]
+            self.shot_number_int = list(map(int, self.shot_number))
+            self.he_angle = None
+            self.ne_angle = None
+            self.xe_angle = None
         self.amps = self.collect_amps()
         self.phase_res = self.collect_phase_res()
-        self.T2 = self.collect_t2()
 
     def collect_shot_data(self):
         file_list = self.file_list
@@ -91,7 +100,7 @@ class RunAnalyzer:
         plt.title('Run' + self.run_number)
         plt.show()
 
-    def plot_freqs(self):
+    def plot_freqs_shot(self):
         shot_number = self.shot_number_int
         freqs = self.freqs
         freq_err = self.freq_err
@@ -121,7 +130,37 @@ class RunAnalyzer:
         plt.title('Run' + self.run_number)
         plt.show()
 
-    def plot_amps(self, a, b):
+    def plot_freqs_angle(self):
+        ne_angle = self.ne_angle
+        freqs = self.freqs
+        freq_err = self.freq_err
+
+        plt.figure()
+        plt.errorbar(ne_angle, freqs['CP'], yerr=freq_err['CP'], fmt='-o')
+        plt.xlabel('Ne angle')
+        plt.ylabel('$\omega_{CP}$')
+        plt.title('Run' + self.run_number)
+
+        plt.figure()
+        plt.errorbar(ne_angle, freqs['H'], yerr=freq_err['H'], fmt='-v')
+        plt.xlabel('Ne angle')
+        plt.ylabel('$\omega_{He}$')
+        plt.title('Run' + self.run_number)
+
+        plt.figure()
+        plt.errorbar(ne_angle, freqs['N'], yerr=freq_err['N'], fmt='-^')
+        plt.xlabel('Ne angle')
+        plt.ylabel('$\omega_{Ne}$')
+        plt.title('Run' + self.run_number)
+
+        plt.figure()
+        plt.errorbar(ne_angle, freqs['X'], yerr=freq_err['X'], fmt='-x')
+        plt.xlabel('Ne angle')
+        plt.ylabel('$\omega_{Xe}$')
+        plt.title('Run' + self.run_number)
+        plt.show()
+
+    def plot_amps_shot(self, a, b):
         shot_number = self.shot_number_int
         amps = self.amps
 
@@ -135,9 +174,4 @@ class RunAnalyzer:
         plt.xlabel('shot number')
         plt.ylabel('Amplitude [V]')
         plt.show()
-
-
-
-
-
 

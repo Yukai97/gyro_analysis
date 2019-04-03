@@ -296,7 +296,7 @@ class SClist:
         f = open(file_path, 'w')
         output_dict = {'fkeys': self.fkeys, 'freqs': self.freqs, 'freq_err': self.freq_err, 'phase_res': self.phase_res,
                        'T2': self.T2, 'amps': self.amps, 'init_phases': self.init_phases, 'end_phases': self.end_phases,
-                       'shotinfo': self.shotinfo.__dict__}
+                       'timestamp': self.hdr['runtime_stamp'], 'shotinfo': self.shotinfo.__dict__}
         json_output = json.dumps(output_dict)
         f.write(json_output)
         f.close()
