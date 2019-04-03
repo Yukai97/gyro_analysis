@@ -29,15 +29,18 @@ class RawFitter:
     """
 
     def __init__(self, rawdata: rawdata, block_length=6 / fN,
-                 freqs2fit=['X', '0h3n']):
+                 freqs2fit=['X', '0h3n', '1h-2n', '1h2n', '1h-1n', '1h1n', '5n', '4n', '1.5n']):
         """
 
         :type rawdata: RawData class
         """
         self.raw = deepcopy(rawdata)
+        self.path = self.raw.path
+        self.shotinfo = self.raw.shotinfo
         self.time = self.raw.time
         self.dt = self.raw.dt
         self.bl = block_length  # in seconds
+        self.freqs2fit = freqs2fit
         self.nb = int((rawdata.time[-1] - rawdata.time[0]) / block_length)
         self.base_fit = self.set_fitting_freqs(freqs2fit)
         self.blist = self.init_blocks()
@@ -104,14 +107,14 @@ class RawFitter:
         r_squared = 1 - ss_res / ss_tot
         return r_squared
 
-    def fit_blocks(self):
+    def process_blocks(self):
         r2_list = []
         res_int_list = []
         for block in self.blist:
             s, e, dt = block.start, block.end, block.dt
             t = self.block_time(s, e)  # find phase relative to block start
             data = self.block_data(s, e)  # data, offset subtracted
-            block = self.fit_seg(block)
+            block = self.process_seg(block)
             res = data - block.eval(t)
             r_squared = self.get_r_squared(res, data)
             res_int = sum(res) * dt
@@ -125,36 +128,28 @@ class RawFitter:
         self.res_int = np.sum(res_int_list)
         return
 
-    def fit_seg(self, scdat_obj):
+    def process_seg(self, scdat_obj):
         seg = scdat_obj
         s, e = seg.start, seg.end
         wH, wN = seg.wH, seg.wN
-        a0 = self.fit_hx_amp_seg(s, e, wH, wN)
+        a0 = self.fit_amp_seg(s, e, [wH, wN])
         w0 = self.fit_freq_seg(s, e, *a0)
         seg.update_hene(w0)
         names = seg.names
         w1 = [seg.w[i] for i in names]
-        amps = self.fit_arb_amp_seg(s, e, w1).reshape(-1, 2)
+        amps = self.fit_amp_seg(s, e, w1).reshape(-1, 2)
         for i in range(len(names)):
             seg.a[names[i]] = amps[i][0]
             seg.b[names[i]] = amps[i][1]
         return seg
 
-    # fit He&Xe amplitudes of segment
-    def fit_hx_amp_seg(self, start, end, wH, wN):
-        """ define segment between start and end; hold wH and wN constant and find amplitudes """
-        t0 = self.block_time(start, end)
-        d0 = self.block_data(start, end)
-        bf0 = self.bf_hene(t0, wH, wN).transpose()
-        return opt.lsq_linear(bf0, d0)['x']
-
     # fit amplitudes of arbitrary frequencies
-    def fit_arb_amp_seg(self, start, end, freqs):
+    def fit_amp_seg(self, start, end, freqs):
         """ find sine and cosine amplitudes (nx2 array) of n freqs;  """
-        t0 = self.block_time(start, end)
-        d0 = self.block_data(start, end)
-        bf0 = self.bf_freqs(t0, freqs).transpose()
-        lf = opt.lsq_linear(bf0, d0, tol=1e-16)
+        t = self.block_time(start, end)
+        data = self.block_data(start, end)
+        bf0 = self.bf_freqs(t, freqs).transpose()
+        lf = opt.lsq_linear(bf0, data, tol=1e-16)
         if not lf['success']:
             raise RuntimeError('Fit of raw data to sine & cosine')
         return lf['x']
@@ -163,15 +158,15 @@ class RawFitter:
     def fit_freq_seg(self, start, end, asH, acH, asN, acN):
         """ """
         wH, wN = self.base_fit.wH, self.base_fit.wN
-        t0 = self.block_time(start, end)
-        d0 = self.block_data(start, end)
+        block_t = self.block_time(start, end)
+        data = self.block_data(start, end)
         A0 = [asH, acH, asN, acN]
 
         def res(w, t, d, amps):
             para_dict = dict(aH=amps[0], bH=amps[1], aN=amps[2], bN=amps[3], wH=w[0], wN=w[1])
             return self.func_hene(t, para_dict) - d
 
-        return opt.least_squares(res, x0=[wH, wN], ftol=1e-12, args=(t0, d0, A0))['x']
+        return opt.least_squares(res, x0=[wH, wN], ftol=1e-12, args=(block_t, data, A0))['x']
 
     def func_hene(self, t, params):
         """ Returns a sin wt + b cos wt for a pair of frequencies  """
@@ -182,10 +177,6 @@ class RawFitter:
         bN = params['bN']
         wN = params['wN']
         return aH * sin(wH * t) + bH * cos(wH * t) + aN * sin(wN * t) + bN * cos(wN * t)
-
-    def bf_hene(self, t, wH, wN):
-        """ he & ne basis functions """
-        return np.array([sin(wH * t), cos(wH * t), sin(wN * t), cos(wN * t)])
 
     def bf_freqs(self, t, freqs):
         """ sin/cos basis functions from arbitrary list of frequencies """
@@ -200,12 +191,12 @@ class RawFitter:
         bl = self.blist[ind]
         start = bl.start
         end = bl.end
-        t0 = self.block_time(start, end)
-        d0 = self.block_data(start, end)
-        f0 = bl.eval(t0)
+        t = self.block_time(start, end)
+        data = self.block_data(start, end)
+        fitting_data = bl.eval(t)
         fig, ax = plt.subplots()
-        ax.plot(t0 + self.time[start], d0, 'k.')
-        ax.plot(t0 + self.time[start], f0, 'b')
+        ax.plot(t + self.time[start], data, 'k.')
+        ax.plot(t + self.time[start], fitting_data, 'b')
         ax.set_xlabel('time [s]')
         ax.set_ylabel('signal [V]')
         fig.show()
@@ -221,7 +212,7 @@ class RawFitter:
         fig.show()
         return fig, ax
 
-    def plot_res_ave(self, ave_points = 30):
+    def plot_res_ave(self, ave_points=30):
         """
         average residuals by ave_points before plotting, to remove high-frequency component.
 
@@ -273,23 +264,25 @@ class RawFitter:
         ax.set_xlim(xlim)
         return fig, ax
 
-    def write_json(self, l = ''):
-        # todo: Add the freqlist
-        # todo: Add the ddict
-        # todo: Add default freqs
+    def write_json(self, l=''):
 
         "write blist (output of fit_blocks()) to a json file of same name as RawData file + l"
         fname = os.path.splitext(self.raw.name)[0]+l
         now = datetime.now()
+
         def default_json(o):
             return o.__dict__
 
         hdr = {'name': fname, 'block_length': self.bl, 'dt': self.raw.dt,
-               'runtime_stamp': str(self.raw.time_stamp),
+               'runtime_stamp': str(self.raw.timestamp),
                'writetime': now.strftime('%Y-%m-%d %H:%M:%S'),
-               'offset': self.offset}
+               'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.fitting_paras,
+               'default_freq': default_freq}
 
-        wn = os.path.join(self.raw.scdir, fname + '.scf')
+        scdir_run = os.path.join(self.path['scdir'], self.raw.run_number)
+        if not os.path.isdir(scdir_run):
+            os.makedirs(scdir_run)
+        wn = os.path.join(scdir_run, fname + '.scf')
         f = open(wn, 'w')
         lst = deepcopy(self.blist)
         lst.append(hdr)
@@ -297,7 +290,7 @@ class RawFitter:
         f.close()
         return
 
-    def export_res(self, res_path, l = ''):
+    def export_res(self, res_path, l=''):
 
         """
         export residuals to files. The first row is time and the second row is res. 

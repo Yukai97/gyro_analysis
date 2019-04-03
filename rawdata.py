@@ -1,21 +1,20 @@
 import os
 import re
 import time
-from datetime import datetime
 
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy import signal
 
 from gyro_analysis import ddict, ave_array
+from gyro_analysis import shotinfo
+from gyro_analysis.local_path import *
 
-#todo: PEP 8 for package
-#todo: move rc params settings
 
 class RawData:
-    """
-    Loads voltage data from the specified file. ddict contains parameters
+    """Loads voltage data from the specified file.
 
+    ddict contains parameters
     example: ddict = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[20, 500], nave=1)
     dt: time step between volatge records
     mag: start and end time of magnetometer  # currently not used
@@ -24,24 +23,22 @@ class RawData:
     """
     # todo: get_data load: try except loadtxt; user input if fname absent
 
-    def __init__(self, homedir, rawdir, fdir, scdir, filename=None, hfile=ddict):
-        self.homedir = homedir
-        self.rawdir = rawdir
-        self.scdir = scdir
-        self.fdir = fdir
-        self.dir = os.path.join(self.rawdir, fdir)
+    def __init__(self, run_number, filename=None, fitting_paras=ddict):
+        self.shotinfo = shotinfo.ShotInfo(run_number, filename)
+        self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
         self.name = filename
-        self.header = hfile  # eventually, make header files and use self.get_hdr(hfile)
-        self.dt = self.header['dt']
+        self.ext = '.rdt'
+        self.run_number = run_number
+        self.rawdir_run = os.path.join(self.path['rawdir'], run_number)
+        self.fitting_paras = fitting_paras  # eventually, make header files and use self.get_hdr(hfile)
+        self.dt = self.fitting_paras['dt']
         self.fs = 1 / self.dt
-        self.all_data = self.get_data()
+        self.all_data = self.load_data()
         self.data = self.roi_data()
-        self.nave = self.header['nave']
+        self.nave = self.fitting_paras['nave']
         self.time = self.make_time()
-        self.time_stamp = self.get_time_stamp()
         if self.nave > 1:
             self.ave_data()  # changes self.data, self.dt self.fs and self.time
-        # self.tlength = self
         self.psd = None
 
     # def get_hdr(self, hfile):
@@ -55,41 +52,33 @@ class RawData:
     #         print('Need to learn to read header files')
     #         # todo: design header file format syntax and load here; ensure there is a dt term and roi term
 
-    def get_time_stamp(self):
-        if 'local_time' in self.header:
-            loc = self.header['local_time']
-        else:
-            full_file = os.path.join(self.dir, self.name)
-            t = os.path.getctime(full_file)
-            tmptime = time.localtime(t)
-            return time.strftime('%Y-%m-%d', tmptime)
-        return loc
-
     # set up class instance
 
-    def get_data(self):
+    def load_data(self):
         while True:
-            full_file = os.path.join(self.dir, self.name)
+            full_file = os.path.join(self.rawdir_run, self.name + self.ext)
             try:
                 raw_data = np.loadtxt(full_file)
                 break
             except FileNotFoundError:
-                inp = [0,0]
-                print('File name {} in directory {} not found.'.format(self.name, self.dir))
-                inp[0] = input('Enter run directory [{}] or x to exit:'.format(self.fdir)) or self.fdir
-                inp[1] = input('Enter file name  to analyze [{}] or x to exit): '.format(self.name)) or self.name
+                inp = [0, 0]
+                file_name = self.name + self.ext
+                print('File name {} in directory {} not found.'.format(file_name, self.rawdir_run))
+                inp[0] = input('Enter run directory [{}] or x to exit:'.format(self.run_number)) or self.run_number
+                inp[1] = input('Enter file name  to analyze [{}] or x to exit): '.format(file_name)) or file_name
                 if 'x' in inp or 'X' in inp:
                     raise FileNotFoundError('Failed to open raw data file')
-                self.fdir = inp[0]
-                self.name = inp[1]
-                self.dir = os.path.join(self.rawdir, self.fdir)
+                self.run_number = inp[0]
+                self.name = inp[1].split('.')[0]
+                self.ext = inp[1].split('.')[1]
+                self.rawdir_run = os.path.join(self.path['rawdir'], self.run_number)
         if raw_data.ndim == 1:
             return raw_data
         else:
             return raw_data[:, -1]
 
     def roi_data(self):
-        roi = self.header['roi']
+        roi = self.fitting_paras['roi']
         fs = self.fs
         return self.all_data[int(roi[0] * fs):int(roi[1] * fs)]
 
@@ -100,7 +89,7 @@ class RawData:
         self.fs = 1 / self.dt
 
     def make_time(self):
-        roi = self.header['roi']
+        roi = self.fitting_paras['roi']
         return np.arange(roi[0] * self.fs, roi[1] * self.fs) * self.dt
 
     def plot_all_data(self):

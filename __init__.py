@@ -3,17 +3,12 @@ import numpy as np
 import os
 from numpy import pi
 
-# todo: convert all visualization methods to plt_xxx
-# todo: documentation, info and dictionary keys + explanation & help methods
-# todo: make jupyter notebooks testing block-length dependence of fit
-# todo: look at fit to corrected phases
-
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
 mpl.rcParams['savefig.dpi'] = 100
-mpl.rcParams['font.size'] = 40
+mpl.rcParams['font.size'] = 22
 mpl.rcParams['axes.unicode_minus'] = False
-# mpl.rc('font', **{'family': 'serif', 'serif': ['cmr10']})
+mpl.rc('font', **{'family': 'serif', 'serif': ['cmr10']})
 # mpl.rc('text', usetex=True)
 
 ddict = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[25, 500], nave=1)
@@ -34,28 +29,5 @@ def ave_array(arr_to_ave, npts):
     return np.mean(ashape, 1)
 
 
-__all__ = ['rawdata', 'rawfitter', 'scfitter', 'ddict', 'tdict', 'freqlist', 'default_freq', 'fN', 'fH', 'df',
-           'ave_array']
-
-# class block_settings(block_length, nyquist_freq)
-
-# def fit_blocks(fname, dt=1e-3):
-#    data = np.loadtxt(currdir+fname)
-
-# if __name__ == "__main__":
-#     ff = 'data_18-12-14_2132_005.txt'
-#     r = RawData(filename=ff, hfile=ddict)
-#     b = SCfitter(r)
-#     b.fit_blocks()
-
-
-# fl = ['data_18-12-14_2132_005.txt',
-#       'data_18-12-14_2242_009.txt',
-#       'data_18-12-14_2318_011.txt',
-#       'data_18-12-15_0011_014.txt',
-#       'data_18-12-15_0104_017.txt',
-#       'data_18-12-15_0140_019.txt',
-#       'data_18-12-15_0157_020.txt',
-#       'data_18-12-15_0326_025.txt',
-#       'data_18-12-15_0716_038.txt',
-#       'data_18-12-15_1013_048.txt']
+__all__ = ['rawdata', 'rawfitter', 'scfitter', 'analyzer', 'shotinfo', 'local_path', 'ddict', 'tdict', 'freqlist',
+           'default_freq', 'fN', 'fH', 'df', 'ave_array']
