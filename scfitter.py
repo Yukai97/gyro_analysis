@@ -76,7 +76,8 @@ class SClist:
         self.freq_errs = self.fp['freq_start_err']
         self.phase_start = self.fp['phase_start']
         self.phase_end = self.fp['phase_end']
-        self.phase_errs = self.fp['phase_err']
+        self.phase_start_err = self.fp['phase_start_err']
+        self.phase_end_err = self.fp['phase_end_err']
         self.residuals = self.res_dict['res_start']
 
     def amp_phase(self):
@@ -266,7 +267,7 @@ class SClist:
     def plot_phase_res(self):
         """ Plot Ne, He, corrected residuals after linear fit """
 
-        r = self.phase_res
+        r = self.residuals
         t = self.time
         fig, ax = plt.subplots(3, 1, sharex=True)
         ax[0].plot(t, r['N'])
@@ -289,7 +290,7 @@ class SClist:
         return fig, ax, big_ax
 
     def plot_phase_res_psd(self, f, a, b):
-        rs = self.phase_res[f]
+        rs = self.residuals[f]
         n = len(rs)
         t = self.bl
         x = np.linspace(0.0, n * t, n)
@@ -312,8 +313,13 @@ class SClist:
 
         file_path = os.path.join(self.shotdir_run, file_name + '.shd')
         f = open(file_path, 'w')
-        output_dict = {'fkeys': self.fkeys, 'freqs': self.freqs, 'freq_err': self.freq_err, 'phase_res': self.phase_res,
-                       'T2': self.T2, 'amps': self.amps, 'init_phases': self.init_phases, 'end_phases': self.end_phases,
+        residuals = {}
+        for fk in self.fkeys:
+            residuals[fk] = list(self.residuals[fk])
+        output_dict = {'fkeys': self.fkeys, 'freqs': self.freqs, 'freq_err': self.freq_errs,
+                       'residuals': residuals, 'T2': self.T2, 'amps': self.amps,
+                       'phase_start': self.phase_start, 'phase_start_err': self.phase_start_err,
+                       'phase_end': self.phase_end, 'phase_end_err': self.phase_end_err,
                        'block length': self.bl, 'shotinfo': self.shotinfo.__dict__}
         json_output = json.dumps(output_dict)
         f.write(json_output)

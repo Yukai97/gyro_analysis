@@ -31,6 +31,8 @@ class ShotInfo:
             self.ne_angle = header['ne_angle']
             self.xe_angle = header['xe_angle']
             self.timestamp = header['timestamp']
+            self.cycle_number = header['cycle_number']
+            self.sequence_var = header['sequence_var']
             read_header.close()
 
     def get_timestamp(self):

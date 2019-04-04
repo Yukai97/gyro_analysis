@@ -51,6 +51,7 @@ class RawFitter:
         self.r_squared = None  # defined in fit_blocks
         self.res_int_list = None  # defined in fit_blocks
         self.res_int = None  # defined in fit_blocks
+        self.abs_res_max = None
         # self.ind = [int(i * block_length * self.raw.fs) for i in range(self.nb)]
         self.p = np.arange(self.nb)
 
@@ -126,6 +127,7 @@ class RawFitter:
         self.r_squared = np.array(r2_list)
         self.res_int_list = np.array(res_int_list)
         self.res_int = np.sum(res_int_list)
+        self.abs_res_max = np.max(np.abs(self.res))
         return
 
     def process_seg(self, scdat_obj):
@@ -265,8 +267,7 @@ class RawFitter:
         return fig, ax
 
     def write_json(self, l=''):
-
-        "write blist (output of fit_blocks()) to a json file of same name as RawData file + l"
+        """write blist (output of fit_blocks()) to a json file of same name as RawData file + l"""
         fname = os.path.splitext(self.raw.name)[0]+l
         now = datetime.now()
 
@@ -274,7 +275,6 @@ class RawFitter:
             return o.__dict__
 
         hdr = {'name': fname, 'block_length': self.bl, 'dt': self.raw.dt,
-               'runtime_stamp': str(self.raw.timestamp),
                'writetime': now.strftime('%Y-%m-%d %H:%M:%S'),
                'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.fitting_paras,
                'default_freq': default_freq}
