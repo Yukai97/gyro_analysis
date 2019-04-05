@@ -51,7 +51,6 @@ class SClist:
         self.shotdir_run = os.path.join(self.path['shotdir'], run_number)
         self.fullname = os.path.join(self.scdir_run, self.name + self.ext)
         with open(self.fullname, 'r') as read_data:
-            print('loading file:' + self.fullname)
             data = json.load(read_data)
         self.hdr = data[-1]
         self.l = data[:-1]
@@ -72,8 +71,8 @@ class SClist:
         self.freqs_and_phases = freqs_and_phases
         self.fp = freqs_and_phases
         self.res_dict = residuals
-        self.freqs = self.fp['freq_start']
-        self.freq_errs = self.fp['freq_start_err']
+        self.freq = self.fp['freq_start']
+        self.freq_err = self.fp['freq_start_err']
         self.phase_start = self.fp['phase_start']
         self.phase_end = self.fp['phase_end']
         self.phase_errs = self.fp['phase_err']
@@ -303,6 +302,7 @@ class SClist:
 
     def write_json(self, l):
         """
+        Write json with some relevant outputs of analyzing the phase data
 
         """
 
@@ -312,8 +312,10 @@ class SClist:
 
         file_path = os.path.join(self.shotdir_run, file_name + '.shd')
         f = open(file_path, 'w')
-        output_dict = {'fkeys': self.fkeys, 'freqs': self.freqs, 'freq_err': self.freq_err, 'phase_res': self.phase_res,
-                       'T2': self.T2, 'amps': self.amps, 'init_phases': self.init_phases, 'end_phases': self.end_phases,
+        output_dict = {'fkeys': self.fkeys, 'freq': self.freq,
+                       'freq_err': self.freq_err, 'residuals': self.residuals,
+                       'T2': self.T2, 'amps': self.amps, 'phase_start': self.phase_start,
+                       'phase_end': self.phase_end,
                        'block length': self.bl, 'shotinfo': self.shotinfo.__dict__}
         json_output = json.dumps(output_dict)
         f.write(json_output)
