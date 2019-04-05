@@ -12,8 +12,9 @@ class RunAnalyzer:
         run_number: specify the run we need to analyze
     """
 
-    def __init__(self, run_number):
+    def __init__(self, run_number, sequence_name):
         self.run_number = run_number
+        self.sequence_name = str(sequence_name)
         self.shotdir_run = os.path.join(shotdir, self.run_number)
         self.file_list = sorted(os.listdir(self.shotdir_run))
         self.shot_data = self.load_shot_data()
@@ -159,6 +160,8 @@ class RunAnalyzer:
 
         fig, ax = plt.subplots(2, 2, sharex=True)
         fig.suptitle('Run ' + self.run_number)
+        fig.tight_layout()
+        plt.subplots_adjust(top=0.87)
 
         ax[0][0].errorbar(shot_number, freqs['CP'], yerr=freq_err['CP'], fmt='-o')
         ax[0][0].set_ylabel('$\omega_{CP}$')
@@ -174,6 +177,7 @@ class RunAnalyzer:
         ax[1][1].set_xlabel('shot number')
         ax[1][1].set_ylabel('$\omega_{Xe}$')
         plt.show()
+        return fig, ax
 
     def plot_amps_shot(self, a, b):
         """Plot mean value of amplitudes in (a, b) of He, Ne and Xe versus shot number """
@@ -193,85 +197,65 @@ class RunAnalyzer:
 
     def plot_freqs_sequence(self):
         """Plot frequencies of CP, He, Ne and Xe with errorbars versus Ne rotation angle"""
-        freqs_angle = {}
+        sequence = np.array(self.sequence_per_cycle).transpose()
+        freqs_per_cycle = {}
         for f in self.fkeys:
-            freqs_angle[f] = []
-            ne_angle = []
-            for i in range(self.cycle_total):
-                index = list(map(lambda x: x == str(i), self.cycle_number))
-                freqs_angle[f].append(self.freqs[f][index])
-                ne_angle.append(np.array(self.ne_angle)[index])
-            freqs_angle[f] = np.array(freqs_angle[f]).transpose()
-        ne_angle = np.array(ne_angle).transpose()
+            freqs_per_cycle[f] = np.array(self.freqs_per_cycle[f]).transpose()
 
-        plt.figure()
-        plt.plot(ne_angle, freqs_angle['CP'], '-o')
-        plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel('Ne angle')
-        plt.ylabel('$\omega_{CP}$')
-        plt.title('Run' + self.run_number)
+        fig, ax = plt.subplots(2, 2, sharex=True)
+        fig.suptitle('Run ' + self.run_number)
+        fig.tight_layout()
+        plt.subplots_adjust(top=0.87)
 
-        plt.figure()
-        plt.plot(ne_angle, freqs_angle['H'], '-v')
-        plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel('Ne angle')
-        plt.ylabel('$\omega_{He}$')
-        plt.title('Run' + self.run_number)
+        ax[0][0].plot(sequence, freqs_per_cycle['CP'], '-o')
+        ax[0][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+        ax[0][0].set_ylabel('$\omega_{CP}$')
 
-        plt.figure()
-        plt.plot(ne_angle, freqs_angle['N'], '-^')
-        plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel('Ne angle')
-        plt.ylabel('$\omega_{Ne}$')
-        plt.title('Run' + self.run_number)
+        ax[0][1].plot(sequence, freqs_per_cycle['H'], '-v')
+        ax[0][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+        ax[0][1].set_ylabel('$\omega_{He}$')
 
-        plt.figure()
-        plt.plot(ne_angle, freqs_angle['X'], '-x')
-        plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel('Ne angle')
-        plt.ylabel('$\omega_{Xe}$')
-        plt.title('Run' + self.run_number)
+        ax[1][0].plot(sequence, freqs_per_cycle['N'], '-^')
+        ax[1][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+        ax[1][0].set_xlabel(self.sequence_name)
+        ax[1][0].set_ylabel('$\omega_{Ne}$')
+
+        ax[1][1].plot(sequence, freqs_per_cycle['X'], '-x')
+        ax[1][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+        ax[1][1].set_xlabel(self.sequence_name)
+        ax[1][1].set_ylabel('$\omega_{Xe}$')
+
         plt.show()
+        return fig, ax
 
     def plot_amps_sequence(self, a, b):
         """Plot mean value of amplitudes in (a, b) of He, Ne and Xe versus shot number """
-        amps = self.amps
+        amps_per_cycle = self.amps_per_cycle
 
-        he_amps = np.array([np.mean(amps['H'][i][a:b]) for i in self.shot_number_int])
-        ne_amps = np.array([np.mean(amps['N'][i][a:b]) for i in self.shot_number_int])
-        xe_amps = np.array([np.mean(amps['X'][i][a:b]) for i in self.shot_number_int])
-
-        he_amps_angle = []
-        ne_amps_angle = []
-        xe_amps_angle = []
-        ne_angle = []
-        for i in range(self.cycle_total):
-            index = list(map(lambda x: x == str(i), self.cycle_number))
-            he_amps_angle.append(he_amps[index])
-            ne_amps_angle.append(ne_amps[index])
-            xe_amps_angle.append(xe_amps[index])
-            ne_angle.append(np.array(self.ne_angle)[index])
-        he_amps_angle = np.array(he_amps_angle).transpose()
-        ne_amps_angle = np.array(ne_amps_angle).transpose()
-        xe_amps_angle = np.array(xe_amps_angle).transpose()
-        ne_angle = np.array(ne_angle).transpose()
+        fkey = ['H', 'N', 'X']
+        mean_amps = {}
+        for f in fkey:
+            mean_amps[f] = np.mean(np.array(amps_per_cycle[f])[:, :, a:b], 2)
+            mean_amps[f] = mean_amps[f].transpose()
+        sequence = np.array(self.sequence_per_cycle).transpose()
 
         plt.figure()
-        plt.plot(ne_angle, ne_amps_angle, '-o')
+        plt.plot(sequence, mean_amps['N'], '-^')
         plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel('Ne angle')
-        plt.ylabel('Ne Amplitude [V]')
+        plt.xlabel(self.sequence_name)
+        plt.ylabel('Ne amplitude [V]')
 
         plt.figure()
-        plt.plot(ne_angle, he_amps_angle, '-o')
+        plt.plot(sequence, mean_amps['H'], '-v')
         plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel('Ne angle')
-        plt.ylabel('He Amplitude [V]')
+        plt.xlabel(self.sequence_name)
+        plt.ylabel('He amplitude [V]')
 
         plt.figure()
-        plt.plot(ne_angle, xe_amps_angle, '-o')
+        plt.plot(sequence, mean_amps['X'], '-x')
         plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel('Ne angle')
-        plt.ylabel('Xe Amplitude [V]')
+        plt.xlabel(self.sequence_name)
+        plt.ylabel('Xe amplitude [V]')
+
         plt.show()
 
