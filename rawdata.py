@@ -21,7 +21,6 @@ class RawData:
     spins: start and end time of spin precession  # currently not used
     roi: region of interest to analyze
     """
-    # todo: get_data load: try except loadtxt; user input if fname absent
 
     def __init__(self, run_number, filename=None, fitting_paras=ddict):
         self.shotinfo = shotinfo.ShotInfo(run_number, filename)
@@ -40,17 +39,6 @@ class RawData:
         if self.nave > 1:
             self.ave_data()  # changes self.data, self.dt self.fs and self.time
         self.psd = None
-
-    # def get_hdr(self, hfile):
-    #     default_header = dict(dt=1e-3, mag=[4, 500], spins=[12, 500], roi=[20, 500])
-    #     if hfile is None:
-    #         return default_header
-    #     if type(hfile) is dict:
-    #         return hfile
-    #     else:
-    #         return hfile
-    #         print('Need to learn to read header files')
-    #         # todo: design header file format syntax and load here; ensure there is a dt term and roi term
 
     # set up class instance
 

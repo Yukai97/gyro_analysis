@@ -197,30 +197,37 @@ class RunAnalyzer:
 
     def plot_freqs_sequence(self):
         """Plot frequencies of CP, He, Ne and Xe with errorbars versus Ne rotation angle"""
-        sequence = np.array(self.sequence_per_cycle).transpose()
-        freqs_per_cycle = {}
-        for f in self.fkeys:
-            freqs_per_cycle[f] = np.array(self.freqs_per_cycle[f]).transpose()
+        sequence_per_cycle = self.sequence_per_cycle
+        freqs_per_cycle = self.freqs_per_cycle
+        freq_errs_per_cycle = self.freq_errs_per_cycle
 
         fig, ax = plt.subplots(2, 2, sharex=True)
         fig.suptitle('Run ' + self.run_number)
         fig.tight_layout()
         plt.subplots_adjust(top=0.87)
 
-        ax[0][0].plot(sequence, freqs_per_cycle['CP'], '-o')
+        for i in range(self.cycle_total):
+            ax[0][0].errorbar(sequence_per_cycle[i], freqs_per_cycle['CP'][i], yerr=freq_errs_per_cycle['CP'][i],
+                              fmt='-o')
         ax[0][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
         ax[0][0].set_ylabel('$\omega_{CP}$')
 
-        ax[0][1].plot(sequence, freqs_per_cycle['H'], '-v')
+        for i in range(self.cycle_total):
+            ax[0][1].errorbar(sequence_per_cycle[i], freqs_per_cycle['H'][i], yerr=freq_errs_per_cycle['H'][i],
+                              fmt='-o')
         ax[0][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
         ax[0][1].set_ylabel('$\omega_{He}$')
 
-        ax[1][0].plot(sequence, freqs_per_cycle['N'], '-^')
+        for i in range(self.cycle_total):
+            ax[1][0].errorbar(sequence_per_cycle[i], freqs_per_cycle['N'][i], yerr=freq_errs_per_cycle['N'][i],
+                              fmt='-o')
         ax[1][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
         ax[1][0].set_xlabel(self.sequence_name)
         ax[1][0].set_ylabel('$\omega_{Ne}$')
 
-        ax[1][1].plot(sequence, freqs_per_cycle['X'], '-x')
+        for i in range(self.cycle_total):
+            ax[1][1].errorbar(sequence_per_cycle[i], freqs_per_cycle['X'][i], yerr=freq_errs_per_cycle['X'][i],
+                              fmt='-o')
         ax[1][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
         ax[1][1].set_xlabel(self.sequence_name)
         ax[1][1].set_ylabel('$\omega_{Xe}$')
