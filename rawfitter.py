@@ -8,8 +8,8 @@ from matplotlib import pyplot as plt
 from numpy.core.umath import sin, cos
 from scipy import optimize as opt, signal
 
-from gyro_analysis import rawdata, fN, default_freq, ave_array
-
+from gyro_analysis import fN, default_freq, ave_array, freqlist
+from gyro_analysis.rawdata import RawData
 
 class RawFitter:
     """ Initialized with RawData object, length of blocks and frequencies to fit
@@ -28,15 +28,14 @@ class RawFitter:
 
     """
 
-    def __init__(self, rawdata: rawdata, block_length=6 / fN,
-                 freqs2fit=['X', '0h3n', '1h-2n', '1h2n', '1h-1n', '1h1n', '5n', '4n', '1.5n']):
+    def __init__(self, rawdata: RawData, block_length=6 / fN,
+                 freqs2fit=freqlist):
         """
 
         :type rawdata: RawData class
         """
         self.raw = deepcopy(rawdata)
         self.path = self.raw.path
-        self.shotinfo = self.raw.shotinfo
         self.time = self.raw.time
         self.dt = self.raw.dt
         self.bl = block_length  # in seconds
@@ -48,9 +47,10 @@ class RawFitter:
         self.time = self.time[:int(self.fit_span)]
         self.data, self.offset = self.remove_offset()
         self.res = np.zeros(int(self.fit_span))
-        self.r_squared = None  # defined in fit_blocks
-        self.res_int_list = None  # defined in fit_blocks
-        self.res_int = None  # defined in fit_blocks
+        self.r_squared = None  # defined in process_blocks
+        self.res_int_list = None  # defined in process_blocks
+        self.res_int = None  # defined in process_blocks
+        self.res_max = None  #defined in process_blocks
         # self.ind = [int(i * block_length * self.raw.fs) for i in range(self.nb)]
         self.p = np.arange(self.nb)
 
@@ -126,6 +126,7 @@ class RawFitter:
         self.r_squared = np.array(r2_list)
         self.res_int_list = np.array(res_int_list)
         self.res_int = np.sum(res_int_list)
+        self.res_max = np.max(np.abs(self.res_int_list))
         return
 
     def process_seg(self, scdat_obj):
