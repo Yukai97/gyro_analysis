@@ -1,6 +1,4 @@
 import os
-import re
-import time
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -26,7 +24,7 @@ class RawData:
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
         self.file_name = '_'.join([self.run_number, self.shot_number])
-        self.readdir = os.path.join(lp.rawdir, run_number)
+        self.rawdir_run = os.path.join(lp.rawdir, run_number)
         self.fitting_paras = fitting_paras  # eventually, make header files and use self.get_hdr(hfile)
         self.dt = self.fitting_paras['dt']
         self.fs = 1 / self.dt
@@ -41,14 +39,14 @@ class RawData:
     def load_data(self):
         while True:
             file_name = self.file_name + self.ext
-            full_file = os.path.join(self.readdir, file_name)
+            full_file = os.path.join(self.rawdir_run, file_name)
             try:
                 raw_data = np.loadtxt(full_file)
                 break
             except FileNotFoundError:
                 inp = [0, 0]
-                file_name = self.file_name + '.' + self.ext
-                print('File name {} in directory {} not found.'.format(file_name, self.readdir))
+                file_name = self.file_name + self.ext
+                print('File name {} in directory {} not found.'.format(file_name, self.rawdir_run))
                 inp[0] = input('Enter run directory [{}] or x to exit:'.format(self.run_number)) or self.run_number
                 inp[1] = input('Enter file name  to analyze [{}] or x to exit): '.format(file_name)) or file_name
                 if 'x' in inp or 'X' in inp:
@@ -56,7 +54,7 @@ class RawData:
                 self.run_number = inp[0]
                 self.file_name = inp[1].split('.')[0]
                 self.ext = inp[1].split('.')[1]
-                self.readdir = os.path.join(lp.rawdir, self.run_number)
+                self.rawdir_run = os.path.join(lp.rawdir, self.run_number)
         if raw_data.ndim == 1:
             return raw_data
         else:

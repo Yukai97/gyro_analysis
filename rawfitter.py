@@ -10,6 +10,8 @@ from scipy import optimize as opt, signal
 
 from gyro_analysis import fN, default_freq, ave_array, freqlist
 from gyro_analysis.rawdata import RawData
+from gyro_analysis import local_path as lp
+
 
 class RawFitter:
     """ Initialized with RawData object, length of blocks and frequencies to fit
@@ -35,7 +37,6 @@ class RawFitter:
         :type rawdata: RawData class
         """
         self.raw = deepcopy(rawdata)
-        self.path = self.raw.path
         self.time = self.raw.time
         self.dt = self.raw.dt
         self.bl = block_length  # in seconds
@@ -50,7 +51,7 @@ class RawFitter:
         self.r_squared = None  # defined in process_blocks
         self.res_int_list = None  # defined in process_blocks
         self.res_int = None  # defined in process_blocks
-        self.res_max = None  #defined in process_blocks
+        self.abs_res_max = None  #defined in process_blocks
         # self.ind = [int(i * block_length * self.raw.fs) for i in range(self.nb)]
         self.p = np.arange(self.nb)
 
@@ -126,7 +127,7 @@ class RawFitter:
         self.r_squared = np.array(r2_list)
         self.res_int_list = np.array(res_int_list)
         self.res_int = np.sum(res_int_list)
-        self.res_max = np.max(np.abs(self.res_int_list))
+        self.abs_res_max = np.max(np.abs(self.res_int_list))
         return
 
     def process_seg(self, scdat_obj):
@@ -268,7 +269,7 @@ class RawFitter:
     def write_json(self, l=''):
 
         "write blist (output of fit_blocks()) to a json file of same name as RawData file + l"
-        fname = os.path.splitext(self.raw.name)[0]+l
+        fname = os.path.splitext(self.raw.file_name)[0]+l
         now = datetime.now()
 
         def default_json(o):
@@ -279,7 +280,7 @@ class RawFitter:
                'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.fitting_paras,
                'default_freq': default_freq}
 
-        scdir_run = os.path.join(self.path['scdir'], self.raw.run_number)
+        scdir_run = os.path.join(lp.scdir, self.raw.run_number)
         if not os.path.isdir(scdir_run):
             os.makedirs(scdir_run)
         wn = os.path.join(scdir_run, fname + '.scf')
@@ -296,7 +297,7 @@ class RawFitter:
         export residuals to files. The first row is time and the second row is res. 
         """
 
-        fname = os.path.splitext(self.raw.name)[0]+l
+        fname = os.path.splitext(self.raw.file_name)[0]+l
         full_path = os.path.join(res_path, fname + '.res')
         t = self.time
         res = self.res
