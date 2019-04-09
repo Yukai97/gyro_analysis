@@ -1,6 +1,6 @@
 import os
 
-homedir = r"C:\Users\Romalis Group\Desktop\New Data"
+homedir = r"/Users/William/Library/Mobile Documents/com~apple~CloudDocs/Science/HE-NE/fitting_dev/B30/Data"
 rawdir = os.path.join(homedir, 'Raw data')
 infodir = os.path.join(homedir, 'Info data')
 scdir = os.path.join(homedir, 'SC data')

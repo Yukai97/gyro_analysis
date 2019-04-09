@@ -34,6 +34,7 @@ class DarkTime:
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
         self.write_dir = os.path.join(lp.shotdir, self.run_number)
+        self.ext = 'sho'
         self.n_det = len(self.det_times)
         self.narr = np.arange(self.n_det)
         self.labels = ascii_lowercase[:self.n_det]
@@ -151,7 +152,7 @@ class DarkTime:
         file_name = self.file_name + l
         if not os.path.isdir(self.write_dir):
             os.makedirs(self.write_dir)
-        file_path = os.path.join(self.write_dir, file_name + '.dto')
+        file_path = os.path.join(self.write_dir, file_name + self.ext)
         od = self.output_dict
         f = open(file_path, 'w')
 

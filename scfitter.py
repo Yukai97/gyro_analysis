@@ -48,20 +48,21 @@ class SClist:
     """
 
     def __init__(self, run_number, shot_number, label):
-        self.ext = '.scf'
+        self.ext_in = '.scf'
+        self.ext_out = 'dto'
         self.label = label
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
         self.file_name = '_'.join([self.run_number, self.shot_number])+self.label
         self.full_name = os.path.join(lp.shotdir)
         self.hene_ratio = HENE_RATIO
-        self.ext = '.scf'
+        self.ext_in = '.scf'
         self.shotinfo = ShotInfo(run_number, shot_number)
         self.scdir = lp.scdir
         self.path = {'homedir': lp.homedir, 'rawdir': lp.rawdir,
                      'infodir': lp.infodir, 'scdir': lp.scdir, 'shotdir': lp.shotdir}
         self.write_dir = os.path.join(self.path['shotdir'], self.run_number)
-        self.fullname = os.path.join(lp.scdir, self.run_number, self.file_name + self.ext)
+        self.fullname = os.path.join(lp.scdir, self.run_number, self.file_name + self.ext_in)
         with open(self.fullname, 'r') as read_data:
             data = jsont.load(read_data)
         self.hdr = data[-1]
@@ -323,7 +324,7 @@ class SClist:
         file_name = self.file_name + l
         if not os.path.isdir(self.write_dir):
             os.makedirs(self.write_dir)
-        file_path = os.path.join(self.write_dir, file_name + '.shd')
+        file_path = os.path.join(self.write_dir, file_name + self.out_ext)
 
         def default_json(o):
             return o.__dict__
@@ -344,7 +345,7 @@ class ShdReader:
     """ Class for reading .sco files output by SClist """
 
     def __init__(self, run_number, shot_number, label):
-        self.ext = '.shd'
+        self.ext = '.dto'
         self.label = label
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
