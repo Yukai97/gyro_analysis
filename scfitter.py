@@ -7,9 +7,9 @@ from scipy import optimize as opt
 from matplotlib import pyplot as plt
 import matplotlib as mpl
 import os
-import json
-from gyro_analysis import shotinfo
-from gyro_analysis.local_path import *
+import json_tricks as jsont
+from gyro_analysis.shotinfo import ShotInfo
+import gyro_analysis.local_path as lp
 
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
@@ -22,12 +22,19 @@ mpl.rcParams['axes.formatter.limits'] = (-2, 2)
 
 HENE_RATIO = 9.650
 
+####
+####
+#### '{:04d}'.format change number to int(number)
+####
+#### load_info needs run_number not name (get rid of all names)
+####
+
 
 class SClist:
     """
     Stores and manipulates a list of SCdat objects plus a header.
 
-    SClist.l contains the list of SCdat objects one for each block
+    SClist.l contains the list of SCdat o917-957-3766bjects one for each block
     SClist.fkeys  contains a list of the species whose signals are being computed.
     SClist.amps, contains amplitudes for each signal
     SClist.total_phases contains phases for each signal
@@ -40,18 +47,24 @@ class SClist:
 
     """
 
-    def __init__(self, run_number, name):
-        # todo: discuss end phases. end_time is not true end time
+    def __init__(self, run_number, shot_number, label):
+        self.ext_in = '.scf'
+        self.ext_out = 'dto'
+        self.label = label
+        self.run_number = '{:04d}'.format(int(run_number))
+        self.shot_number = '{:03d}'.format(int(shot_number))
+        self.file_name = '_'.join([self.run_number, self.shot_number])+self.label
+        self.full_name = os.path.join(lp.shotdir)
         self.hene_ratio = HENE_RATIO
-        self.name = name
-        self.ext = '.scf'
-        self.shotinfo = shotinfo.ShotInfo(run_number, name)
-        self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
-        self.scdir_run = os.path.join(self.path['scdir'], run_number)
-        self.shotdir_run = os.path.join(self.path['shotdir'], run_number)
-        self.fullname = os.path.join(self.scdir_run, self.name + self.ext)
+        self.ext_in = '.scf'
+        self.shotinfo = ShotInfo(run_number, shot_number)
+        self.scdir = lp.scdir
+        self.path = {'homedir': lp.homedir, 'rawdir': lp.rawdir,
+                     'infodir': lp.infodir, 'scdir': lp.scdir, 'shotdir': lp.shotdir}
+        self.write_dir = os.path.join(self.path['shotdir'], self.run_number)
+        self.fullname = os.path.join(lp.scdir, self.run_number, self.file_name + self.ext_in)
         with open(self.fullname, 'r') as read_data:
-            data = json.load(read_data)
+            data = jsont.load(read_data)
         self.hdr = data[-1]
         self.l = data[:-1]
         self.keys = list(self.l[0].keys())
@@ -62,11 +75,13 @@ class SClist:
         self.end_time = self.l[-1]['end'] * self.dt
         self.amps = self.collect_amps()
         self.block_phases = self.collect_block_phases()
+
         self.bl = (self.l[0]['end'] - self.l[0]['start']) * self.dt
         self.total_phases = self.collect_total_phases()
         self.ne_corr = self.corrected_phases()
         self.T2 = self.fit_T2()
         self.fkeys.append('CP')
+
         freqs_and_phases, residuals = self.fit_phases()
         self.freqs_and_phases = freqs_and_phases
         self.fp = freqs_and_phases
@@ -75,7 +90,7 @@ class SClist:
         self.freq_err = self.fp['freq_start_err']
         self.phase_start = self.fp['phase_start']
         self.phase_end = self.fp['phase_end']
-        self.phase_errs = self.fp['phase_err']
+        self.phase_err = self.fp['phase_start_err']
         self.residuals = self.res_dict['res_start']
 
     def amp_phase(self):
@@ -249,7 +264,7 @@ class SClist:
         ax.set_xlabel('Time [s]')
         plt.subplots_adjust(left=0.17)
         plt.subplots_adjust(bottom=0.17)
-        ax.set_title('Run {}, block length {}'.format(self.name, self.bl))
+        ax.set_title('Run {}, block length {}'.format(self.file_name, self.bl))
         return fig, ax
 
     def plot_phase(self, fk):
@@ -259,7 +274,7 @@ class SClist:
         ax.set_xlabel('Time [s]')
         plt.subplots_adjust(left=0.17)
         plt.subplots_adjust(bottom=0.17)
-        ax.set_title('Run {}, block length {}'.format(self.name, self.bl))
+        ax.set_title('Run {}, block length {}'.format(self.file_name, self.bl))
         return fig, ax
 
     def plot_phase_res(self):
@@ -300,24 +315,53 @@ class SClist:
         ax.semilogy(xf[1:n//2], 2*np.abs(rf[1:n//2])/n)
         return fig, ax
 
-    def write_json(self, l):
+    def write_json(self, l=''):
         """
         Write json with some relevant outputs of analyzing the phase data
 
         """
 
-        file_name = self.name + l
-        if not os.path.isdir(self.shotdir_run):
-            os.makedirs(self.shotdir_run)
+        file_name = self.file_name + l
+        if not os.path.isdir(self.write_dir):
+            os.makedirs(self.write_dir)
+        file_path = os.path.join(self.write_dir, file_name + self.out_ext)
 
-        file_path = os.path.join(self.shotdir_run, file_name + '.shd')
+        def default_json(o):
+            return o.__dict__
+
         f = open(file_path, 'w')
         output_dict = {'fkeys': self.fkeys, 'freq': self.freq,
                        'freq_err': self.freq_err, 'residuals': self.residuals,
                        'T2': self.T2, 'amps': self.amps, 'phase_start': self.phase_start,
-                       'phase_end': self.phase_end,
-                       'block length': self.bl, 'shotinfo': self.shotinfo.__dict__}
-        json_output = json.dumps(output_dict)
+                       'phase_end': self.phase_end, 'phase_err': self.phase_err,
+                       'block length': self.bl}
+        json_output = jsont.dumps(output_dict)
         f.write(json_output)
         f.close()
         return
+
+
+class ShdReader:
+    """ Class for reading .sco files output by SClist """
+
+    def __init__(self, run_number, shot_number, label):
+        self.ext = '.dto'
+        self.label = label
+        self.run_number = '{:04d}'.format(int(run_number))
+        self.shot_number = '{:03d}'.format(int(shot_number))
+        self.file_name = '_'.join([self.run_number, self.shot_number])+label+self.ext
+        self.full_name = os.path.join(lp.shotdir, self.run_number, self.file_name)
+        with open(self.full_name, 'r') as read_data:
+            scdata = jsont.load(read_data)
+        self.fkeys = scdata['fkeys']
+        self.freq = scdata['freq']
+        self.freq_err = scdata['freq_err']
+        self.residuals = scdata['residuals']
+        self.T2 = scdata['T2']
+        self.amps = scdata['amps']
+        self.phase_start = scdata['phase_start']
+        self.phase_end = scdata['phase_end']
+        self.phase_err = scdata['phase_err']
+        self.bl = scdata['block length']
+        self.shotinfo = ShotInfo(self.run_number, self.shot_number)
+        self.si = self.shotinfo
