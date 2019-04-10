@@ -283,7 +283,7 @@ class RawFitter:
         scdir_run = os.path.join(lp.scdir, self.raw.run_number)
         if not os.path.isdir(scdir_run):
             os.makedirs(scdir_run)
-        wn = os.path.join(scdir_run, fname + '.scf')
+        wn = os.path.join(scdir_run, fname + lp.rf_ex_out)
         f = open(wn, 'w')
         lst = deepcopy(self.blist)
         lst.append(hdr)

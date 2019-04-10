@@ -48,20 +48,14 @@ class SClist:
     """
 
     def __init__(self, run_number, shot_number, label):
-        self.ext_in = '.scf'
-        self.ext_out = '.wdf'
         self.label = label
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
         self.file_name = '_'.join([self.run_number, self.shot_number])+self.label
         self.hene_ratio = HENE_RATIO
-        self.ext_in = '.scf'
         self.shotinfo = ShotInfo(run_number, shot_number)
-        self.scdir = lp.scdir
-        self.path = {'homedir': lp.homedir, 'rawdir': lp.rawdir, 'wddir': lp.wddir,
-                     'infodir': lp.infodir, 'scdir': lp.scdir, 'shotdir': lp.shotdir}
-        self.wddir_run = os.path.join(self.path['wddir'], self.run_number)
-        self.fullname = os.path.join(lp.scdir, self.run_number, self.file_name + self.ext_in)
+        self.wddir_run = os.path.join(lp.wddir, self.run_number)
+        self.fullname = os.path.join(lp.scdir, self.run_number, self.file_name + lp.sc_ex_in)
         with open(self.fullname, 'r') as read_data:
             data = jsont.load(read_data)
         self.hdr = data[-1]
@@ -279,7 +273,7 @@ class SClist:
     def plot_phase_res(self):
         """ Plot Ne, He, corrected residuals after linear fit """
 
-        r = self.phase_res
+        r = self.residuals
         t = self.time
         fig, ax = plt.subplots(3, 1, sharex=True)
         ax[0].plot(t, r['N'])
@@ -302,7 +296,7 @@ class SClist:
         return fig, ax, big_ax
 
     def plot_phase_res_psd(self, f, a, b):
-        rs = self.phase_res[f]
+        rs = self.residuals[f]
         n = len(rs)
         t = self.bl
         x = np.linspace(0.0, n * t, n)
@@ -323,10 +317,7 @@ class SClist:
         file_name = self.file_name + l
         if not os.path.isdir(self.wddir_run):
             os.makedirs(self.wddir_run)
-        file_path = os.path.join(self.wddir_run, file_name + self.ext_out)
-
-        def default_json(o):
-            return o.__dict__
+        file_path = os.path.join(self.wddir_run, file_name + lp.sc_ex_out)
 
         f = open(file_path, 'w')
         output_dict = {'fkeys': self.fkeys, 'freq': self.freq,
@@ -344,11 +335,10 @@ class WdfReader:
     """ Class for reading .sco files output by SClist """
 
     def __init__(self, run_number, shot_number, label):
-        self.ext = '.dto'
         self.label = label
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
-        self.file_name = '_'.join([self.run_number, self.shot_number])+label+self.ext
+        self.file_name = '_'.join([self.run_number, self.shot_number])+label+lp.sc_ex_out
         self.full_name = os.path.join(lp.wddir, self.run_number, self.file_name)
         with open(self.full_name, 'r') as read_data:
             scdata = jsont.load(read_data)

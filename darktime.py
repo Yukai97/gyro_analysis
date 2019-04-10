@@ -14,12 +14,6 @@ import gyro_analysis.local_path as lp
 # todo:  Check detection times (Plot vs Laser file?); load detection times from config file
 # todo:  Check phase residuals
 
-def analyze_dark_time(run_number, shot_number)
-    dark = DarkTime(run_number, shot_number)
-    dark.process_rdt_to_scf()
-    dark.process_scf_to_wdf()
-    dark.process_wdf_to_dto()
-
 
 class DarkTime:
     """ Analyze a shot with dark time
@@ -40,50 +34,24 @@ class DarkTime:
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
         self.shotdir_run = os.path.join(lp.shotdir, self.run_number)
-        self.ext = '.shd'
         self.n_det = len(self.det_times)
         self.narr = np.arange(self.n_det)
         self.labels = ascii_lowercase[:self.n_det]
-        self.detection_time_dict = self.make_detection_time_dict()
-        self.dark_time_dict = self.make_dark_time_dict()  # modified by calc_dark_time
         self.ok = ['y', 'Y']
         self.file_name = '_'.join([self.run_number, self.shot_number])
         self.check_init()
         self.abs_res_max = np.zeros(self.n_det)
-        #  self.process_rdt_to_sco(ddict)
+        self.process_rdt_to_scf()
         if check_raw:
             self.check_raw_res()
-        # self.process_sco_to_shd()
+        self.process_scf_to_wdf()
         if check_phases:
             self.check_phase_res()
         self.wdfs = {l: WdfReader(self.run_number, self.shot_number, l) for l in self.labels}
         self.dark_time_dict = self.calc_dark_time()
-        self.output_dict = self.make_output()
-        self.process_shd_to_dto()
-
-    def make_dark_time_dict(self):
-        """ dict of dark-time segments """
-        dark_time_dict = {}
-        for i in self.narr[:-1]:
-            dt_label = self.labels[i] + self.labels[i + 1]
-            time_diff = self.det_times[i + 1][0] - self.det_times[i][1]
-            dark_time_dict[dt_label] = dict(time_diff=time_diff,
-                                            time_start=self.det_times[i][1],
-                                            time_end=self.det_times[i + 1][0],
-                                            phase_diff={},
-                                            phase_diff_err={},
-                                            freq={},
-                                            freq_err={})
-        return dark_time_dict
-
-    def make_detection_time_dict(self):
-        """ dict of detection-time segments """
-        dtd = {}
-        det = self.det_times
-        for i in self.narr:
-            l = self.labels[i]
-            dtd[l] = dict(start=det[i][0], end=det[i][1])
-        return dtd
+        self.detection_time_dict = self.load_detection_time()
+        self.output_dict = {**self.detection_time_dict, **self.dark_time_dict}
+        self.process_wdf_to_shd()
 
     def check_init(self):
         """ Validate parameters """
@@ -122,57 +90,52 @@ class DarkTime:
             sc.write_json()
         return
 
-    def process_wdf_to_dto(self):
+    def process_wdf_to_shd(self):
         """ determine dark time frequencies; load and record relevant light time values """
         self.write_json()
         return
 
     def calc_dark_time(self):
         """ determine dark time frequencies """
+        dark_time_dict = {}
         wdfs = self.wdfs
-        od = self.dark_time_dict
-        for key in self.dark_time_dict:
-            k1 = key[0]
-            k2 = key[1]
+        for i in self.narr[:-1]:
+            k1 = self.labels[i]
+            k2 = self.labels[i + 1]
+            key = k1 + k2
+            time_diff = self.det_times[i + 1][0] - self.det_times[i][1]
+            dark_time_dict[key] = dict(time_diff=time_diff, time_start=self.det_times[i][1],
+                                       time_end=self.det_times[i + 1][0],
+                                       phase_diff={}, phase_diff_err={},
+                                       freq={}, freq_err={})
             for sp in wdfs[k1].fkeys:
                 phdf = wdfs[k2].phase_start[sp] - wdfs[k1].phase_end[sp]
-                phdf_err = np.sqrt(wdfs[k2].phase_err[sp]**2 + wdfs[k1].phase_err[sp]**2)
-                td = self.dark_time_dict[key]['time_diff']
-                od[key]['phase_diff'][sp] = phdf
-                od[key]['phase_diff_err'][sp] = phdf_err
-                od[key]['freq'][sp] = phdf/td
-                od[key]['freq_err'][sp] = phdf_err/td
-        return od
+                phdf_err = np.sqrt(wdfs[k2].phase_err[sp] ** 2 + wdfs[k1].phase_err[sp] ** 2)
+                dark_time_dict[key]['phase_diff'][sp] = phdf
+                dark_time_dict[key]['phase_diff_err'][sp] = phdf_err
+                dark_time_dict[key]['freq'][sp] = phdf/time_diff
+                dark_time_dict[key]['freq_err'][sp] = phdf_err/time_diff
+        return dark_time_dict
 
     def load_detection_time(self):
         """ loading detection times """
+        detection_time_dict = {}
         wdfs = self.wdfs
-        idict = self.detection_time_dict
-        for key in idict:
-            for sp in wdfs[key]:
-
-
-        return
-
-    def make_output(self):
-        """ generate output json object """
-        out_dict = self.detection_time_dict.copy()
-        out_dict.update(self.dark_time_dict)
-        return out_dict
+        det = self.det_times
+        for i in self.narr:
+            l = self.labels[i]
+            detection_time_dict[l] = dict(start=det[i][0], end=det[i][1], wdf=wdfs[l])
+        return detection_time_dict
 
     def write_json(self, l=''):
         """ write json object to file """
         file_name = self.file_name + l
         if not os.path.isdir(self.shotdir_run):
             os.makedirs(self.shotdir_run)
-        file_path = os.path.join(self.shotdir_run, file_name + self.ext)
+        file_path = os.path.join(self.shotdir_run, file_name + lp.dt_ex_out)
         od = self.output_dict
         f = open(file_path, 'w')
-
-        def default_json(o):
-            return o.__dict__
-
-        json_output = jsont.dumps(od, default=default_json)
+        json_output = jsont.dumps(od)
         f.write(json_output)
         f.close()
 

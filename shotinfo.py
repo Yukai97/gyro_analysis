@@ -16,7 +16,7 @@ class ShotInfo:
         self.shot_number = '{:03d}'.format(int(shot_number))
         self.ext = '.hdr'
         self.file_name = '_'.join([self.run_number, self.shot_number])
-        file_path = os.path.join(lp.infodir, self.run_number, self.file_name+self.ext)
+        file_path = os.path.join(lp.infodir, self.run_number, self.file_name + lp.shot_ex_header)
         try:
             read_header = open(file_path, 'r')
             self.exists = True
@@ -34,7 +34,7 @@ class ShotInfo:
             read_header.close()
 
     def get_timestamp(self):
-        full_file = os.path.join(lp.rawdir, self.run_number, self.file_name + '.rdt')
+        full_file = os.path.join(lp.rawdir, self.run_number, self.file_name + lp.rd_ex_in)
         t = os.path.getctime(full_file)
         tmptime = time.localtime(t)
         return time.strftime('%Y-%m-%d', tmptime)
