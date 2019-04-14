@@ -352,5 +352,3 @@ class WdfReader:
         self.phase_end = scdata['phase_end']
         self.phase_err = scdata['phase_err']
         self.bl = scdata['block length']
-        self.shotinfo = ShotInfo(self.run_number, self.shot_number)
-        self.si = self.shotinfo

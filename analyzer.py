@@ -1,8 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import os
-import json
+import json_tricks as jsont
 from gyro_analysis.local_path import shotdir
+from string import ascii_lowercase
 
 
 class RunAnalyzer:
@@ -12,15 +13,18 @@ class RunAnalyzer:
     """
 
     def __init__(self, run_number, sequence_name):
-        self.run_number = run_number
+        self.run_number = str(int(run_number)).zfill(4)
         self.sequence_name = str(sequence_name)
         self.shotdir_run = os.path.join(shotdir, self.run_number)
         self.file_list = sorted(os.listdir(self.shotdir_run))
         self.shot_data = self.load_shot_data()
+        self.n_det = int(len(self.shot_data[0].keys())/2)
         self.timestamp = [i['shotinfo']['timestamp'] for i in self.shot_data]
         self.flag = (self.shot_data[0]['shotinfo']['exists'] == True)
-        self.fkeys = self.shot_data[0]['fkeys']
-        self.bl = self.shot_data[0]['block length']
+        self.det_labels = list(ascii_lowercase[:self.n_det])
+        self.dark_labels = [self.det_labels[i] + self.det_labels[i+1] for i in np.arange(self.n_det - 1)]
+        self.fkeys = self.shot_data[0][self.det_labels[0]]['fkeys']
+        self.bl = self.shot_data[0][self.det_labels[0]]['bl']
         [freqs, freq_err] = self.collect_freqs_freqerr()
         self.freqs = freqs
         self.freq_errs = freq_err
@@ -35,7 +39,7 @@ class RunAnalyzer:
             self.ne_angle = [i['shotinfo']['ne_angle'] for i in self.shot_data]
             self.xe_angle = [i['shotinfo']['xe_angle'] for i in self.shot_data]
             self.cycle_number = [i['shotinfo']['cycle_number'] for i in self.shot_data]
-            self.cycle_total = int(max(self.cycle_number)) + 1
+            self.cycle_total = len(set(self.cycle_number))
             self.sequence = [i['shotinfo']['sequence_var'] for i in self.shot_data]
             self.sequence_per_cycle = self.get_sequence_per_cycle()
             [fpc, fepc] = self.get_freqs_per_cycle()
@@ -56,45 +60,60 @@ class RunAnalyzer:
         for i in range(len(file_list)):
             file_path = os.path.join(self.shotdir_run, file_list[i])
             with open(file_path, 'r') as read_data:
-                shot_data.append(json.load(read_data))
+                shot_data.append(jsont.load(read_data))
         return shot_data
 
     def collect_freqs_freqerr(self):
         """Collect all frequencies and corresponding errorbars and return freqs and freq_err dictionaries"""
         freqs = {}
         freq_errs = {}
-        for f in self.fkeys:
-            freqs[f] = np.array([i['freqs'][f] for i in self.shot_data])
-            freq_errs[f] = np.array([i['freq_err'][f] for i in self.shot_data])
+        for label in self.det_labels:
+            freqs[label] = {}
+            freq_errs[label] = {}
+            for f in self.fkeys:
+                freqs[label][f] = np.array([i[label]['freq'][f] for i in self.shot_data])
+                freq_errs[label][f] = np.array([i[label]['freq_err'][f] for i in self.shot_data])
+        for label in self.dark_labels:
+            freqs[label] = {}
+            freq_errs[label] = {}
+            for f in self.fkeys:
+                freqs[label][f] = np.array([i[label]['freq'][f] for i in self.shot_data])
+                freq_errs[label][f] = np.array([i[label]['freq_err'][f] for i in self.shot_data])
         return freqs, freq_errs
 
     def collect_t2(self):
         """Collect the T_2 of He, Ne, and Xe and return T2 dictionary"""
         T2 = {}
         keys = ['H', 'N', 'X']
-        for k in keys:
-            T2[k] = np.array([i['T2'][k] for i in self.shot_data])
+        for label in self.det_labels:
+            T2[label] = {}
+            for k in keys:
+                T2[label][k] = np.array([i[label]['T2'][k] for i in self.shot_data])
         return T2
 
     def collect_amps(self):
         """Collect all amplitudes with different frequencies and return amps dictionary"""
         amps = {}
         new_fkeys = list(set(self.fkeys) - set(['CP']))
-        for f in new_fkeys:
-            amps[f] = []
-            for i in range(len(self.shot_data)):
-                amps[f].append(self.shot_data[i]['amps'][f])
-            amps[f] = np.array(amps[f])
+        for label in self.det_labels:
+            amps[label] = {}
+            for f in new_fkeys:
+                amps[label][f] = []
+                for i in range(len(self.shot_data)):
+                    amps[label][f].append(self.shot_data[i][label]['amps'][f])
+                amps[label][f] = np.array(amps[label][f])
         return amps
 
     def collect_residuals(self):
         """Collect all block phase residuals with different frequencies and return phases_res dictionary"""
         phase_res = {}
-        for f in self.fkeys:
-            phase_res[f] = []
-            for i in range(len(self.shot_data)):
-                phase_res[f].append(self.shot_data[i]['residuals'][f])
-            phase_res[f] = np.array(phase_res[f])
+        for label in self.det_labels:
+            phase_res[label] = {}
+            for f in self.fkeys:
+                phase_res[label][f] = []
+                for i in range(len(self.shot_data)):
+                    phase_res[label][f].append(self.shot_data[i][label]['residuals'][f])
+                phase_res[label][f] = np.array(phase_res[label][f])
         return phase_res
 
     def get_sequence_per_cycle(self):
@@ -108,25 +127,31 @@ class RunAnalyzer:
     def get_freqs_per_cycle(self):
         freqs_per_cycle = {}
         freq_errs_per_cycle = {}
-        for f in self.fkeys:
-            freqs_per_cycle[f] = []
-            freq_errs_per_cycle[f] = []
-            for i in range(self.cycle_total):
-                index = list(map(lambda x: x == str(i), self.cycle_number))
-                freqs_per_cycle[f].append(self.freqs[f][index])
-                freq_errs_per_cycle[f].append(self.freq_errs[f][index])
-            freqs_per_cycle[f] = np.array(freqs_per_cycle[f])
-            freq_errs_per_cycle[f] = np.array(freq_errs_per_cycle[f])
+        labels = self.det_labels + self.dark_labels
+        for label in labels:
+            freqs_per_cycle[label] = {}
+            freq_errs_per_cycle[label] = {}
+            for f in self.fkeys:
+                freqs_per_cycle[label][f] = []
+                freq_errs_per_cycle[label][f] = []
+                for i in range(self.cycle_total):
+                    index = list(map(lambda x: x == str(i), self.cycle_number))
+                    freqs_per_cycle[label][f].append(self.freqs[label][f][index])
+                    freq_errs_per_cycle[label][f].append(self.freq_errs[label][f][index])
+                freqs_per_cycle[label][f] = np.array(freqs_per_cycle[label][f])
+                freq_errs_per_cycle[label][f] = np.array(freq_errs_per_cycle[label][f])
         return freqs_per_cycle, freq_errs_per_cycle
 
     def get_amps_per_cycle(self):
         amps_per_cycle = {}
         new_fkeys = list(set(self.fkeys) - set(['CP']))
-        for f in new_fkeys:
-            amps_per_cycle[f] = []
-            for i in range(self.cycle_total):
-                index = list(map(lambda x: x == str(i), self.cycle_number))
-                amps_per_cycle[f].append(self.amps[f][index])
+        for label in self.det_labels:
+            amps_per_cycle[label] = {}
+            for f in new_fkeys:
+                amps_per_cycle[label][f] = []
+                for i in range(self.cycle_total):
+                    index = list(map(lambda x: x == str(i), self.cycle_number))
+                    amps_per_cycle[label][f].append(self.amps[label][f][index])
         return amps_per_cycle
 
     def plot_t2(self):
@@ -134,21 +159,22 @@ class RunAnalyzer:
         shot_number = self.shot_number_int
         T2 = self.T2
 
-        plt.figure(1)
-        plt.plot(shot_number, T2['X'], '-x')
-        plt.xlabel('shot number')
-        plt.ylabel('$T_2$ of Xe [s]')
-        plt.title('Run ' + self.run_number)
+        for label in self.det_labels:
+            plt.figure(1)
+            plt.plot(shot_number, T2[label]['X'], '-x')
+            plt.xlabel('shot number')
+            plt.ylabel('$T_2$ of Xe [s]')
+            plt.title('Run ' + self.run_number)
 
-        plt.figure(2)
-        plt.plot(shot_number, T2['N'], '-^')
-        plt.xlabel('shot number')
-        plt.ylabel('$T_2$ of Ne [s]')
+            plt.figure(2)
+            plt.plot(shot_number, T2[label]['N'], '-^')
+            plt.xlabel('shot number')
+            plt.ylabel('$T_2$ of Ne [s]')
 
-        plt.figure(3)
-        plt.plot(shot_number, T2['H'], '-v')
-        plt.xlabel('shot number')
-        plt.ylabel('$T_2$ of He [s]')
+            plt.figure(3)
+            plt.plot(shot_number, T2[label]['H'], '-v')
+            plt.xlabel('shot number')
+            plt.ylabel('$T_2$ of He [s]')
         plt.show()
 
     def plot_freqs_shot(self):
@@ -158,23 +184,52 @@ class RunAnalyzer:
         freq_err = self.freq_errs
 
         fig, ax = plt.subplots(2, 2, sharex=True)
-        fig.suptitle('Run ' + self.run_number)
+        fig.suptitle('Run ' + self.run_number + ' light')
         fig.tight_layout()
         plt.subplots_adjust(top=0.87)
 
-        ax[0][0].errorbar(shot_number, freqs['CP'], yerr=freq_err['CP'], fmt='-o')
-        ax[0][0].set_ylabel('$\omega_{CP}$')
+        labels = self.det_labels + self.dark_labels
+        for label in self.det_labels:
+            ax[0][0].errorbar(shot_number, freqs[label]['CP'], yerr=freq_err[label]['CP'], fmt='-o')
+            ax[0][0].set_ylabel('$\omega_{CP}$')
 
-        ax[0][1].errorbar(shot_number, freqs['H'], yerr=freq_err['H'], fmt='-v')
-        ax[0][1].set_ylabel('$\omega_{He}$')
+        for label in self.det_labels:
+            ax[0][1].errorbar(shot_number, freqs[label]['H'], yerr=freq_err[label]['H'], fmt='-v')
+            ax[0][1].set_ylabel('$\omega_{He}$')
 
-        ax[1][0].errorbar(shot_number, freqs['N'], yerr=freq_err['N'], fmt='-^')
-        ax[1][0].set_xlabel('shot number')
-        ax[1][0].set_ylabel('$\omega_{Ne}$')
+        for label in self.det_labels:
+            ax[1][0].errorbar(shot_number, freqs[label]['N'], yerr=freq_err[label]['N'], fmt='-^')
+            ax[1][0].set_xlabel('shot number')
+            ax[1][0].set_ylabel('$\omega_{Ne}$')
 
-        ax[1][1].errorbar(shot_number, freqs['X'], yerr=freq_err['X'], fmt='-x')
-        ax[1][1].set_xlabel('shot number')
-        ax[1][1].set_ylabel('$\omega_{Xe}$')
+        for label in self.det_labels:
+            ax[1][1].errorbar(shot_number, freqs[label]['X'], yerr=freq_err[label]['X'], fmt='-x')
+            ax[1][1].set_xlabel('shot number')
+            ax[1][1].set_ylabel('$\omega_{Xe}$')
+
+        fig2, ax2 = plt.subplots(2, 2, sharex=True)
+        fig2.suptitle('Run ' + self.run_number + ' dark')
+        fig2.tight_layout()
+        plt.subplots_adjust(top=0.87)
+
+        for label in self.dark_labels:
+            ax2[0][0].errorbar(shot_number, freqs[label]['CP'], yerr=freq_err[label]['CP'], fmt='-o')
+            ax2[0][0].set_ylabel('$\omega_{CP}$')
+
+        for label in self.dark_labels:
+            ax2[0][1].errorbar(shot_number, freqs[label]['H'], yerr=freq_err[label]['H'], fmt='-v')
+            ax2[0][1].set_ylabel('$\omega_{He}$')
+
+        for label in self.dark_labels:
+            ax2[1][0].errorbar(shot_number, freqs[label]['N'], yerr=freq_err[label]['N'], fmt='-^')
+            ax2[1][0].set_xlabel('shot number')
+            ax2[1][0].set_ylabel('$\omega_{Ne}$')
+
+        for label in self.dark_labels:
+            ax2[1][1].errorbar(shot_number, freqs[label]['X'], yerr=freq_err[label]['X'], fmt='-x')
+            ax2[1][1].set_xlabel('shot number')
+            ax2[1][1].set_ylabel('$\omega_{Xe}$')
+
         plt.show()
         return fig, ax
 
@@ -183,15 +238,22 @@ class RunAnalyzer:
         shot_number = self.shot_number_int
         amps = self.amps
 
-        he_amps = [np.mean(amps['H'][i][a:b]) for i in self.shot_number_int]
-        ne_amps = [np.mean(amps['N'][i][a:b]) for i in self.shot_number_int]
-        xe_amps = [np.mean(amps['X'][i][a:b]) for i in self.shot_number_int]
+        he_amps = {}
+        ne_amps = {}
+        xe_amps = {}
+        for label in self.det_labels:
+            he_amps[label] = [np.mean(amps[label]['H'][i][a:b]) for i in self.shot_number_int]
+            ne_amps[label] = [np.mean(amps[label]['N'][i][a:b]) for i in self.shot_number_int]
+            xe_amps[label] = [np.mean(amps[label]['X'][i][a:b]) for i in self.shot_number_int]
 
-        plt.figure()
-        plt.plot(shot_number, he_amps, '-v', shot_number, ne_amps, '-^', shot_number, xe_amps, '-x')
-        plt.legend(['He', 'Ne', 'Xe'])
-        plt.xlabel('shot number')
-        plt.ylabel('Amplitude [V]')
+        for label in self.det_labels:
+            plt.figure()
+            plt.title('Run ' + self.run_number + ' detection ' + label)
+            plt.plot(shot_number, he_amps[label], '-v', shot_number, ne_amps[label], '-^', shot_number, xe_amps[label],
+                     '-x')
+            plt.legend(['He', 'Ne', 'Xe'])
+            plt.xlabel('shot number')
+            plt.ylabel('Amplitude [V]')
         plt.show()
 
     def plot_freqs_sequence(self):
@@ -200,41 +262,75 @@ class RunAnalyzer:
         freqs_per_cycle = self.freqs_per_cycle
         freq_errs_per_cycle = self.freq_errs_per_cycle
 
+        for label in self.det_labels:
+            fig, ax = plt.subplots(2, 2, sharex=True)
+            fig.suptitle('Run ' + self.run_number + ' detection ' + label)
+            fig.tight_layout()
+            plt.subplots_adjust(top=0.87)
+            for i in range(self.cycle_total):
+                ax[0][0].errorbar(sequence_per_cycle[i], freqs_per_cycle[label]['CP'][i], yerr=freq_errs_per_cycle[label]['CP'][i],
+                                  fmt='-o')
+            ax[0][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+            ax[0][0].set_ylabel('$\omega_{CP}$')
+
+            for i in range(self.cycle_total):
+                ax[0][1].errorbar(sequence_per_cycle[i], freqs_per_cycle[label]['H'][i], yerr=freq_errs_per_cycle[label]['H'][i],
+                                  fmt='-o')
+            ax[0][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+            ax[0][1].set_ylabel('$\omega_{He}$')
+
+            for i in range(self.cycle_total):
+                ax[1][0].errorbar(sequence_per_cycle[i], freqs_per_cycle[label]['N'][i], yerr=freq_errs_per_cycle[label]['N'][i],
+                                  fmt='-o')
+            ax[1][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+            ax[1][0].set_xlabel(self.sequence_name)
+            ax[1][0].set_ylabel('$\omega_{Ne}$')
+
+            for i in range(self.cycle_total):
+                ax[1][1].errorbar(sequence_per_cycle[i], freqs_per_cycle[label]['X'][i], yerr=freq_errs_per_cycle[label]['X'][i],
+                                  fmt='-o')
+            ax[1][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+            ax[1][1].set_xlabel(self.sequence_name)
+            ax[1][1].set_ylabel('$\omega_{Xe}$')
+
         fig, ax = plt.subplots(2, 2, sharex=True)
-        fig.suptitle('Run ' + self.run_number)
+        fig.suptitle('Run ' + self.run_number + ' dark')
         fig.tight_layout()
         plt.subplots_adjust(top=0.87)
+        for label in self.dark_labels:
+            for i in range(self.cycle_total):
+                ax[0][0].errorbar(sequence_per_cycle[i], freqs_per_cycle[label]['CP'][i],
+                                  yerr=freq_errs_per_cycle[label]['CP'][i],
+                                  fmt='-o')
+            ax[0][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+            ax[0][0].set_ylabel('$\omega_{CP}$')
 
-        for i in range(self.cycle_total):
-            ax[0][0].errorbar(sequence_per_cycle[i], freqs_per_cycle['CP'][i], yerr=freq_errs_per_cycle['CP'][i],
-                              fmt='-o')
-        ax[0][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
-        ax[0][0].set_ylabel('$\omega_{CP}$')
+            for i in range(self.cycle_total):
+                ax[0][1].errorbar(sequence_per_cycle[i], freqs_per_cycle[label]['H'][i],
+                                  yerr=freq_errs_per_cycle[label]['H'][i],
+                                  fmt='-o')
+            ax[0][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+            ax[0][1].set_ylabel('$\omega_{He}$')
 
-        for i in range(self.cycle_total):
-            ax[0][1].errorbar(sequence_per_cycle[i], freqs_per_cycle['H'][i], yerr=freq_errs_per_cycle['H'][i],
-                              fmt='-o')
-        ax[0][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
-        ax[0][1].set_ylabel('$\omega_{He}$')
+            for i in range(self.cycle_total):
+                ax[1][0].errorbar(sequence_per_cycle[i], freqs_per_cycle[label]['N'][i],
+                                  yerr=freq_errs_per_cycle[label]['N'][i],
+                                  fmt='-o')
+            ax[1][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+            ax[1][0].set_xlabel(self.sequence_name)
+            ax[1][0].set_ylabel('$\omega_{Ne}$')
 
-        for i in range(self.cycle_total):
-            ax[1][0].errorbar(sequence_per_cycle[i], freqs_per_cycle['N'][i], yerr=freq_errs_per_cycle['N'][i],
-                              fmt='-o')
-        ax[1][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
-        ax[1][0].set_xlabel(self.sequence_name)
-        ax[1][0].set_ylabel('$\omega_{Ne}$')
-
-        for i in range(self.cycle_total):
-            ax[1][1].errorbar(sequence_per_cycle[i], freqs_per_cycle['X'][i], yerr=freq_errs_per_cycle['X'][i],
-                              fmt='-o')
-        ax[1][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
-        ax[1][1].set_xlabel(self.sequence_name)
-        ax[1][1].set_ylabel('$\omega_{Xe}$')
-
+            for i in range(self.cycle_total):
+                ax[1][1].errorbar(sequence_per_cycle[i], freqs_per_cycle[label]['X'][i],
+                                  yerr=freq_errs_per_cycle[label]['X'][i],
+                                  fmt='-o')
+            ax[1][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
+            ax[1][1].set_xlabel(self.sequence_name)
+            ax[1][1].set_ylabel('$\omega_{Xe}$')
         plt.show()
         return fig, ax
 
-    def plot_amps_sequence(self, a, b):
+    def plot_amps_sequence(self, lb, ub):
         """Plot mean value of amplitudes in (a, b) of He, Ne and Xe versus shot number """
         amps_per_cycle = self.amps_per_cycle
         sequence_per_cycle = self.sequence_per_cycle
@@ -242,7 +338,7 @@ class RunAnalyzer:
         fkey = ['H', 'N', 'X']
         mean_amps = {}
         for f in fkey:
-            mean_amps[f] = np.mean(np.array(amps_per_cycle[f])[:, :, a:b], 2)
+            mean_amps[f] = np.mean(np.array(amps_per_cycle[f])[:, :, lb:ub], 2)
 
         plt.figure()
         for i in range(self.cycle_total):

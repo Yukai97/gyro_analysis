@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from numpy.core.umath import sin, cos
 from scipy import optimize as opt, signal
 
-from gyro_analysis import fN, default_freq, ave_array, freqlist
+from gyro_analysis import fH, fN, default_freq, ave_array, freqlist
 from gyro_analysis.rawdata import RawData
 from gyro_analysis import local_path as lp
 
@@ -30,7 +30,7 @@ class RawFitter:
 
     """
 
-    def __init__(self, rawdata: RawData, block_length=6 / fN,
+    def __init__(self, rawdata: RawData, block_length=40 / fH,
                  freqs2fit=freqlist):
         """
 

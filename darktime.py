@@ -8,6 +8,7 @@ from gyro_analysis.rawdata import RawData
 from gyro_analysis.rawfitter import RawFitter
 from gyro_analysis.scfitter import SClist
 from gyro_analysis.scfitter import WdfReader
+from gyro_analysis.shotinfo import ShotInfo
 from gyro_analysis import ddict
 import gyro_analysis.local_path as lp
 
@@ -41,17 +42,18 @@ class DarkTime:
         self.file_name = '_'.join([self.run_number, self.shot_number])
         self.check_init()
         self.abs_res_max = np.zeros(self.n_det)
-        self.process_rdt_to_scf()
+        #self.process_rdt_to_scf()
         if check_raw:
             self.check_raw_res()
-        self.process_scf_to_wdf()
+        #self.process_scf_to_wdf()
         if check_phases:
             self.check_phase_res()
         self.wdfs = {l: WdfReader(self.run_number, self.shot_number, l) for l in self.labels}
         self.dark_time_dict = self.calc_dark_time()
         self.detection_time_dict = self.load_detection_time()
-        self.output_dict = {**self.detection_time_dict, **self.dark_time_dict}
-        self.process_wdf_to_shd()
+        self.shotinfo = ShotInfo(self.run_number, self.shot_number)
+        self.output_dict = {**self.detection_time_dict, **self.dark_time_dict, 'shotinfo': self.shotinfo.__dict__}
+        #self.process_wdf_to_shd()
 
     def check_init(self):
         """ Validate parameters """
@@ -78,8 +80,8 @@ class DarkTime:
             fp['roi'] = self.det_times[i]
             rd = RawData(self.run_number, self.shot_number, fp)
             rf = RawFitter(rd)
-            self.abs_res_max[i] = rf.abs_res_max
             rf.process_blocks()
+            self.abs_res_max[i] = rf.abs_res_max
             rf.write_json(l=self.labels[i])
         return
 
@@ -109,7 +111,9 @@ class DarkTime:
                                        phase_diff={}, phase_diff_err={},
                                        freq={}, freq_err={})
             for sp in wdfs[k1].fkeys:
-                phdf = wdfs[k2].phase_start[sp] - wdfs[k1].phase_end[sp]
+                phase_start_guess = wdfs[k1].phase_end[sp] + wdfs[k1].freq[sp] * time_diff
+                phase_start = np.unwrap([phase_start_guess, wdfs[k2].phase_start[sp]])[1]
+                phdf = phase_start - wdfs[k1].phase_end[sp]
                 phdf_err = np.sqrt(wdfs[k2].phase_err[sp] ** 2 + wdfs[k1].phase_err[sp] ** 2)
                 dark_time_dict[key]['phase_diff'][sp] = phdf
                 dark_time_dict[key]['phase_diff_err'][sp] = phdf_err
@@ -124,7 +128,8 @@ class DarkTime:
         det = self.det_times
         for i in self.narr:
             l = self.labels[i]
-            detection_time_dict[l] = dict(start=det[i][0], end=det[i][1], wdf=wdfs[l])
+            detection_time_dict[l] = dict(time_start=det[i][0], time_end=det[i][1])
+            detection_time_dict[l].update(wdfs[l].__dict__)
         return detection_time_dict
 
     def write_json(self, l=''):
