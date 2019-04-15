@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 import json
+import matplotlib as mpl
 from gyro_analysis.local_path import shotdir
 
 
@@ -101,7 +102,7 @@ class RunAnalyzer:
     def get_sequence_per_cycle(self):
         spc = []
         for i in range(self.cycle_total):
-            index = list(map(lambda x: x == str(i), self.cycle_number))
+            index = list(map(lambda x: x == i, self.cycle_number))
             spc.append(np.array(self.sequence)[index])
         spc = np.array(spc)
         return spc
@@ -113,7 +114,7 @@ class RunAnalyzer:
             freqs_per_cycle[f] = []
             freq_errs_per_cycle[f] = []
             for i in range(self.cycle_total):
-                index = list(map(lambda x: x == str(i), self.cycle_number))
+                index = list(map(lambda x: x == i, self.cycle_number))
                 freqs_per_cycle[f].append(self.freqs[f][index])
                 freq_errs_per_cycle[f].append(self.freq_errs[f][index])
             freqs_per_cycle[f] = np.array(freqs_per_cycle[f])
@@ -126,7 +127,7 @@ class RunAnalyzer:
         for f in new_fkeys:
             amps_per_cycle[f] = []
             for i in range(self.cycle_total):
-                index = list(map(lambda x: x == str(i), self.cycle_number))
+                index = list(map(lambda x: x == i, self.cycle_number))
                 amps_per_cycle[f].append(self.amps[f][index])
         return amps_per_cycle
 
@@ -158,24 +159,24 @@ class RunAnalyzer:
         freqs = self.freqs
         freq_err = self.freq_errs
 
-        fig, ax = plt.subplots(2, 2, sharex=True)
+        fig, ax = plt.subplots(2, 2, figsize=(12, 9), sharex=True)
         fig.suptitle('Run ' + self.run_number)
         fig.tight_layout()
         plt.subplots_adjust(top=0.87)
 
         ax[0][0].errorbar(shot_number, freqs['CP'], yerr=freq_err['CP'], fmt='-o')
-        ax[0][0].set_ylabel('$\omega_{CP}$')
+        ax[0][0].set_ylabel('$\omega_{CP}$ $[s^{-1}]$')
 
         ax[0][1].errorbar(shot_number, freqs['H'], yerr=freq_err['H'], fmt='-v')
-        ax[0][1].set_ylabel('$\omega_{He}$')
+        ax[0][1].set_ylabel('$\omega_{He}$ $[s^{-1}]$')
 
         ax[1][0].errorbar(shot_number, freqs['N'], yerr=freq_err['N'], fmt='-^')
         ax[1][0].set_xlabel('shot number')
-        ax[1][0].set_ylabel('$\omega_{Ne}$')
+        ax[1][0].set_ylabel('$\omega_{Ne}$ $[s^{-1}]$')
 
         ax[1][1].errorbar(shot_number, freqs['X'], yerr=freq_err['X'], fmt='-x')
         ax[1][1].set_xlabel('shot number')
-        ax[1][1].set_ylabel('$\omega_{Xe}$')
+        ax[1][1].set_ylabel('$\omega_{Xe}$ $[s^{-1}]$')
         plt.show()
         return fig, ax
 
@@ -201,36 +202,36 @@ class RunAnalyzer:
         freqs_per_cycle = self.freqs_per_cycle
         freq_errs_per_cycle = self.freq_errs_per_cycle
 
-        fig, ax = plt.subplots(2, 2, sharex=True)
-        fig.suptitle('Run ' + self.run_number)
-        fig.tight_layout()
+        fig, ax = plt.subplots(2, 2, figsize=(12, 9), sharex=True)
+        # fig.suptitle('Run ' + self.run_number)
+        mpl.rcParams['figure.figsize'] = (8, 6)
         plt.subplots_adjust(top=0.87)
 
         for i in range(self.cycle_total):
             ax[0][0].errorbar(sequence_per_cycle[i], freqs_per_cycle['CP'][i], yerr=freq_errs_per_cycle['CP'][i],
                               fmt='-o')
         ax[0][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
-        ax[0][0].set_ylabel('$\omega_{CP}$')
+        ax[0][0].set_ylabel('$\omega_{CP}$ $[s^{-1}]$')
 
         for i in range(self.cycle_total):
             ax[0][1].errorbar(sequence_per_cycle[i], freqs_per_cycle['H'][i], yerr=freq_errs_per_cycle['H'][i],
-                              fmt='-o')
+                              fmt='-v')
         ax[0][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
-        ax[0][1].set_ylabel('$\omega_{He}$')
+        ax[0][1].set_ylabel('$\omega_{He}$ $[s^{-1}]$')
 
         for i in range(self.cycle_total):
             ax[1][0].errorbar(sequence_per_cycle[i], freqs_per_cycle['N'][i], yerr=freq_errs_per_cycle['N'][i],
-                              fmt='-o')
+                              fmt='-^')
         ax[1][0].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
         ax[1][0].set_xlabel(self.sequence_name)
-        ax[1][0].set_ylabel('$\omega_{Ne}$')
+        ax[1][0].set_ylabel('$\omega_{Ne}$ $[s^{-1}]$')
 
         for i in range(self.cycle_total):
             ax[1][1].errorbar(sequence_per_cycle[i], freqs_per_cycle['X'][i], yerr=freq_errs_per_cycle['X'][i],
-                              fmt='-o')
+                              fmt='-x')
         ax[1][1].legend([str(i) for i in range(self.cycle_total)], fontsize=10)
         ax[1][1].set_xlabel(self.sequence_name)
-        ax[1][1].set_ylabel('$\omega_{Xe}$')
+        ax[1][1].set_ylabel('$\omega_{Xe}$ $[s^{-1}]$')
 
         plt.show()
         return fig, ax
