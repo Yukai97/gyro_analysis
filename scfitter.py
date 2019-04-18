@@ -1,15 +1,13 @@
 import numpy as np
-from numpy import sin
-from numpy import cos
+import os
 from scipy import signal
 from scipy import fftpack
 from scipy import optimize as opt
 from matplotlib import pyplot as plt
 import matplotlib as mpl
-import os
 import json
 from gyro_analysis import shotinfo
-from gyro_analysis.local_path import *
+from gyro_analysis import local_path as lp
 
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
@@ -44,14 +42,11 @@ class SClist:
         # todo: discuss end phases. end_time is not true end time
         self.hene_ratio = HENE_RATIO
         self.name = name
-        self.ext = '.scf'
         self.shotinfo = shotinfo.ShotInfo(run_number, name)
-        self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
-        self.scdir_run = os.path.join(self.path['scdir'], run_number)
-        self.shotdir_run = os.path.join(self.path['shotdir'], run_number)
-        self.fullname = os.path.join(self.scdir_run, self.name + self.ext)
+        self.scdir_run = os.path.join(lp.scdir, run_number)
+        self.shotdir_run = os.path.join(lp.shotdir, run_number)
+        self.fullname = os.path.join(self.scdir_run, self.name + lp.sc_ex_in)
         with open(self.fullname, 'r') as read_data:
-            print('loading file:' + self.fullname)
             data = json.load(read_data)
         self.hdr = data[-1]
         self.l = data[:-1]

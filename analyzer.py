@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import os
 import json
 import matplotlib as mpl
-from gyro_analysis.local_path import shotdir
+from gyro_analysis import local_path as lp
 
 
 class RunAnalyzer:
@@ -16,7 +16,7 @@ class RunAnalyzer:
     def __init__(self, run_number, sequence_name):
         self.run_number = run_number
         self.sequence_name = str(sequence_name)
-        self.shotdir_run = os.path.join(shotdir, self.run_number)
+        self.shotdir_run = os.path.join(lp.shotdir, self.run_number)
         self.file_list = sorted(os.listdir(self.shotdir_run))
         self.shot_data = self.load_shot_data()
         self.timestamp = [i['shotinfo']['timestamp'] for i in self.shot_data]
@@ -161,7 +161,6 @@ class RunAnalyzer:
 
         fig, ax = plt.subplots(2, 2, figsize=(12, 9), sharex=True)
         fig.suptitle('Run ' + self.run_number)
-        fig.tight_layout()
         plt.subplots_adjust(top=0.87)
 
         ax[0][0].errorbar(shot_number, freqs['CP'], yerr=freq_err['CP'], fmt='-o')

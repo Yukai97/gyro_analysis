@@ -7,6 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from numpy.core.umath import sin, cos
 from scipy import optimize as opt, signal
+from gyro_analysis import local_path as lp
 
 from gyro_analysis import rawdata, fN, default_freq, ave_array
 
@@ -35,7 +36,6 @@ class RawFitter:
         :type rawdata: RawData class
         """
         self.raw = deepcopy(rawdata)
-        self.path = self.raw.path
         self.shotinfo = self.raw.shotinfo
         self.time = self.raw.time
         self.dt = self.raw.dt
@@ -279,10 +279,10 @@ class RawFitter:
                'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.fitting_paras,
                'default_freq': default_freq}
 
-        scdir_run = os.path.join(self.path['scdir'], self.raw.run_number)
+        scdir_run = os.path.join(lp.scdir, self.raw.run_number)
         if not os.path.isdir(scdir_run):
             os.makedirs(scdir_run)
-        wn = os.path.join(scdir_run, fname + '.scf')
+        wn = os.path.join(scdir_run, fname + lp.rf_ex_out)
         f = open(wn, 'w')
         lst = deepcopy(self.blist)
         lst.append(hdr)

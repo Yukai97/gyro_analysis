@@ -26,7 +26,6 @@ class RawData:
         self.shotinfo = shotinfo.ShotInfo(run_number, filename)
         self.path = {'homedir': homedir, 'rawdir': rawdir, 'infordir': infodir, 'scdir': scdir, 'shotdir': shotdir}
         self.name = filename
-        self.ext = '.rdt'
         self.run_number = run_number
         self.rawdir_run = os.path.join(self.path['rawdir'], run_number)
         self.fitting_paras = fitting_paras  # eventually, make header files and use self.get_hdr(hfile)
@@ -44,13 +43,13 @@ class RawData:
 
     def load_data(self):
         while True:
-            full_file = os.path.join(self.rawdir_run, self.name + self.ext)
+            full_file = os.path.join(self.rawdir_run, self.name + rd_ex_in)
             try:
                 raw_data = np.loadtxt(full_file)
                 break
             except FileNotFoundError:
                 inp = [0, 0]
-                file_name = self.name + self.ext
+                file_name = self.name + rd_ex_in
                 print('File name {} in directory {} not found.'.format(file_name, self.rawdir_run))
                 inp[0] = input('Enter run directory [{}] or x to exit:'.format(self.run_number)) or self.run_number
                 inp[1] = input('Enter file name  to analyze [{}] or x to exit): '.format(file_name)) or file_name
@@ -58,7 +57,6 @@ class RawData:
                     raise FileNotFoundError('Failed to open raw data file')
                 self.run_number = inp[0]
                 self.name = inp[1].split('.')[0]
-                self.ext = inp[1].split('.')[1]
                 self.rawdir_run = os.path.join(self.path['rawdir'], self.run_number)
         if raw_data.ndim == 1:
             return raw_data
