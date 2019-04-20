@@ -280,10 +280,10 @@ class RawFitter:
                'offset': self.offset, 'freqlist': self.freqs2fit, 'ddict': self.raw.fitting_paras,
                'default_freq': default_freq}
 
-        scdir_run = os.path.join(lp.scdir, self.raw.run_number)
-        if not os.path.isdir(scdir_run):
-            os.makedirs(scdir_run)
-        wn = os.path.join(scdir_run, fname + lp.rf_ex_out)
+        rfodir_run = os.path.join(lp.rfodir, self.raw.run_number)
+        if not os.path.isdir(rfodir_run):
+            os.makedirs(rfodir_run)
+        wn = os.path.join(rfodir_run, fname + lp.rf_ex_out)
         f = open(wn, 'w')
         lst = deepcopy(self.blist)
         lst.append(hdr)

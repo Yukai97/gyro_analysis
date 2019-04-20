@@ -54,8 +54,8 @@ class SClist:
         self.file_name = '_'.join([self.run_number, self.shot_number])+self.label
         self.hene_ratio = HENE_RATIO
         self.shotinfo = ShotInfo(run_number, shot_number)
-        self.wddir_run = os.path.join(lp.wddir, self.run_number)
-        self.fullname = os.path.join(lp.scdir, self.run_number, self.file_name + lp.sc_ex_in)
+        self.scodir_run = os.path.join(lp.scodir, self.run_number)
+        self.fullname = os.path.join(lp.rfodir, self.run_number, self.file_name + lp.sc_ex_in)
         with open(self.fullname, 'r') as read_data:
             data = jsont.load(read_data)
         self.hdr = data[-1]
@@ -315,9 +315,9 @@ class SClist:
         """
 
         file_name = self.file_name + l
-        if not os.path.isdir(self.wddir_run):
-            os.makedirs(self.wddir_run)
-        file_path = os.path.join(self.wddir_run, file_name + lp.sc_ex_out)
+        if not os.path.isdir(self.scodir_run):
+            os.makedirs(self.scodir_run)
+        file_path = os.path.join(self.scodir_run, file_name + lp.sc_ex_out)
 
         f = open(file_path, 'w')
         output_dict = {'fkeys': self.fkeys, 'freq': self.freq,
@@ -331,7 +331,7 @@ class SClist:
         return
 
 
-class WdfReader:
+class ScoReader:
     """ Class for reading .sco files output by SClist """
 
     def __init__(self, run_number, shot_number, label):
@@ -339,7 +339,7 @@ class WdfReader:
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
         self.file_name = '_'.join([self.run_number, self.shot_number])+label+lp.sc_ex_out
-        self.full_name = os.path.join(lp.wddir, self.run_number, self.file_name)
+        self.full_name = os.path.join(lp.scodir, self.run_number, self.file_name)
         with open(self.full_name, 'r') as read_data:
             scdata = jsont.load(read_data)
         self.fkeys = scdata['fkeys']

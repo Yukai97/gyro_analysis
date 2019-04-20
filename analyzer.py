@@ -28,6 +28,7 @@ class RunAnalyzer:
         [freqs, freq_err] = self.collect_freqs_freqerr()
         self.freqs = freqs
         self.freq_errs = freq_err
+        self.chi_square = self.calc_chi_sqaure()
         self.T2 = self.collect_t2()
         self.amps = self.collect_amps()
         self.residuals = self.collect_residuals()
@@ -154,6 +155,20 @@ class RunAnalyzer:
                     amps_per_cycle[label][f].append(self.amps[label][f][index])
         return amps_per_cycle
 
+    def calc_chi_sqaure(self):
+        fkeys = self.fkeys
+        labels = self.det_labels + self.dark_labels
+        freqs = self.freqs
+        freq_errs = self.freq_errs
+        chi_square = {}
+
+        for l in labels:
+            chi_square[l] = {}
+            for f in fkeys:
+                freq_mean = np.mean(freqs[l][f])
+                chi_square[l][f] = np.sum((freqs[l][f] - freq_mean)**2/freq_errs**2)/len(freqs[l][f])
+        return chi_square
+
     def plot_t2(self):
         """Plot T2 of He, Ne, and Xe versus shot number"""
         shot_number = self.shot_number_int
@@ -188,7 +203,6 @@ class RunAnalyzer:
         fig.tight_layout()
         plt.subplots_adjust(top=0.87)
 
-        labels = self.det_labels + self.dark_labels
         for label in self.det_labels:
             ax[0][0].errorbar(shot_number, freqs[label]['CP'], yerr=freq_err[label]['CP'], fmt='-o')
             ax[0][0].set_ylabel('$\omega_{CP}$')

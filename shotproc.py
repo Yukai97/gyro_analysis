@@ -7,7 +7,7 @@ import json_tricks as jsont
 from gyro_analysis.rawdata import RawData
 from gyro_analysis.rawfitter import RawFitter
 from gyro_analysis.scfitter import SClist
-from gyro_analysis.scfitter import WdfReader
+from gyro_analysis.scfitter import ScoReader
 from gyro_analysis.shotinfo import ShotInfo
 from gyro_analysis import ddict
 import gyro_analysis.local_path as lp
@@ -16,7 +16,7 @@ import gyro_analysis.local_path as lp
 # todo:  Check phase residuals
 
 
-class DarkTime:
+class ShotProc:
     """ Analyze a shot with dark time
 
     labelling conventions:
@@ -42,18 +42,18 @@ class DarkTime:
         self.file_name = '_'.join([self.run_number, self.shot_number])
         self.check_init()
         self.abs_res_max = np.zeros(self.n_det)
-        #self.process_rdt_to_scf()
+        self.process_rdt_to_rfo()
         if check_raw:
             self.check_raw_res()
-        #self.process_scf_to_wdf()
+        self.process_rfo_to_sco()
         if check_phases:
             self.check_phase_res()
-        self.wdfs = {l: WdfReader(self.run_number, self.shot_number, l) for l in self.labels}
+        self.scos = {l: ScoReader(self.run_number, self.shot_number, l) for l in self.labels}
         self.dark_time_dict = self.calc_dark_time()
         self.detection_time_dict = self.load_detection_time()
         self.shotinfo = ShotInfo(self.run_number, self.shot_number)
         self.output_dict = {**self.detection_time_dict, **self.dark_time_dict, 'shotinfo': self.shotinfo.__dict__}
-        #self.process_wdf_to_shd()
+        self.process_sco_to_shd()
 
     def check_init(self):
         """ Validate parameters """
@@ -73,7 +73,7 @@ class DarkTime:
         print('check_phase_res not yet implemented')
         return
 
-    def process_rdt_to_scf(self):
+    def process_rdt_to_rfo(self):
         """ run fitters on each detection time and write output files """
         fp = self.parameters
         for i in self.narr:
@@ -85,14 +85,14 @@ class DarkTime:
             rf.write_json(l=self.labels[i])
         return
 
-    def process_scf_to_wdf(self):
+    def process_rfo_to_sco(self):
         """ fit sco files to find frequencies and phases during each detection period """
         for l in self.labels:
             sc = SClist(self.run_number, self.shot_number, l)
             sc.write_json()
         return
 
-    def process_wdf_to_shd(self):
+    def process_sco_to_shd(self):
         """ determine dark time frequencies; load and record relevant light time values """
         self.write_json()
         return
@@ -100,7 +100,7 @@ class DarkTime:
     def calc_dark_time(self):
         """ determine dark time frequencies """
         dark_time_dict = {}
-        wdfs = self.wdfs
+        scos = self.scos
         for i in self.narr[:-1]:
             k1 = self.labels[i]
             k2 = self.labels[i + 1]
@@ -110,11 +110,11 @@ class DarkTime:
                                        time_end=self.det_times[i + 1][0],
                                        phase_diff={}, phase_diff_err={},
                                        freq={}, freq_err={})
-            for sp in wdfs[k1].fkeys:
-                phase_start_guess = wdfs[k1].phase_end[sp] + wdfs[k1].freq[sp] * time_diff
-                phase_start = np.unwrap([phase_start_guess, wdfs[k2].phase_start[sp]])[1]
-                phdf = phase_start - wdfs[k1].phase_end[sp]
-                phdf_err = np.sqrt(wdfs[k2].phase_err[sp] ** 2 + wdfs[k1].phase_err[sp] ** 2)
+            for sp in scos[k1].fkeys:
+                phase_start_guess = scos[k1].phase_end[sp] + scos[k1].freq[sp] * time_diff
+                phase_start = np.unwrap([phase_start_guess, scos[k2].phase_start[sp]])[1]
+                phdf = phase_start - scos[k1].phase_end[sp]
+                phdf_err = np.sqrt(scos[k2].phase_err[sp] ** 2 + scos[k1].phase_err[sp] ** 2)
                 dark_time_dict[key]['phase_diff'][sp] = phdf
                 dark_time_dict[key]['phase_diff_err'][sp] = phdf_err
                 dark_time_dict[key]['freq'][sp] = phdf/time_diff
@@ -124,7 +124,7 @@ class DarkTime:
     def load_detection_time(self):
         """ loading detection times """
         detection_time_dict = {}
-        wdfs = self.wdfs
+        wdfs = self.scos
         det = self.det_times
         for i in self.narr:
             l = self.labels[i]
@@ -137,7 +137,7 @@ class DarkTime:
         file_name = self.file_name + l
         if not os.path.isdir(self.shotdir_run):
             os.makedirs(self.shotdir_run)
-        file_path = os.path.join(self.shotdir_run, file_name + lp.dt_ex_out)
+        file_path = os.path.join(self.shotdir_run, file_name + lp.sp_ex_out)
         od = self.output_dict
         f = open(file_path, 'w')
         json_output = jsont.dumps(od)
