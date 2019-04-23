@@ -166,7 +166,7 @@ class RunAnalyzer:
             chi_square[l] = {}
             for f in fkeys:
                 freq_mean = np.mean(freqs[l][f])
-                chi_square[l][f] = np.sum((freqs[l][f] - freq_mean)**2/freq_errs**2)/len(freqs[l][f])
+                chi_square[l][f] = np.sum((freqs[l][f] - freq_mean)**2/freq_errs[l][f]**2)/len(freqs[l][f])
         return chi_square
 
     def plot_t2(self):
@@ -256,9 +256,9 @@ class RunAnalyzer:
         ne_amps = {}
         xe_amps = {}
         for label in self.det_labels:
-            he_amps[label] = [np.mean(amps[label]['H'][i][a:b]) for i in self.shot_number_int]
-            ne_amps[label] = [np.mean(amps[label]['N'][i][a:b]) for i in self.shot_number_int]
-            xe_amps[label] = [np.mean(amps[label]['X'][i][a:b]) for i in self.shot_number_int]
+            he_amps[label] = [np.mean(amps[label]['H'][i][a:b]) for i in range(len(self.shot_number))]
+            ne_amps[label] = [np.mean(amps[label]['N'][i][a:b]) for i in range(len(self.shot_number))]
+            xe_amps[label] = [np.mean(amps[label]['X'][i][a:b]) for i in range(len(self.shot_number))]
 
         for label in self.det_labels:
             plt.figure()
