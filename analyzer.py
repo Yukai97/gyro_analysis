@@ -102,7 +102,7 @@ class RunAnalyzer:
     def get_sequence_per_cycle(self):
         spc = []
         for i in range(self.cycle_total):
-            index = list(map(lambda x: x == i, self.cycle_number))
+            index = list(map(lambda x: x == str(i), self.cycle_number))
             spc.append(np.array(self.sequence)[index])
         spc = np.array(spc)
         return spc
@@ -114,7 +114,7 @@ class RunAnalyzer:
             freqs_per_cycle[f] = []
             freq_errs_per_cycle[f] = []
             for i in range(self.cycle_total):
-                index = list(map(lambda x: x == i, self.cycle_number))
+                index = list(map(lambda x: x == str(i), self.cycle_number))
                 freqs_per_cycle[f].append(self.freqs[f][index])
                 freq_errs_per_cycle[f].append(self.freq_errs[f][index])
             freqs_per_cycle[f] = np.array(freqs_per_cycle[f])
@@ -127,7 +127,7 @@ class RunAnalyzer:
         for f in new_fkeys:
             amps_per_cycle[f] = []
             for i in range(self.cycle_total):
-                index = list(map(lambda x: x == i, self.cycle_number))
+                index = list(map(lambda x: x == str(i), self.cycle_number))
                 amps_per_cycle[f].append(self.amps[f][index])
         return amps_per_cycle
 
