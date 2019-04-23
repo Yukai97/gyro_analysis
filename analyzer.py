@@ -351,30 +351,33 @@ class RunAnalyzer:
 
         fkey = ['H', 'N', 'X']
         mean_amps = {}
-        for f in fkey:
-            mean_amps[f] = np.mean(np.array(amps_per_cycle[f])[:, :, lb:ub], 2)
+        for label in self.det_labels:
+            mean_amps[label] = {}
+            for f in fkey:
+                mean_amps[label][f] = np.mean(np.array(amps_per_cycle[label][f])[:, :, lb:ub], 2)
 
-        plt.figure()
-        for i in range(self.cycle_total):
-            plt.plot(sequence_per_cycle[i], mean_amps['N'][i], '-^')
-        plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel(self.sequence_name)
-        plt.ylabel('Ne amplitude [V]')
-        plt.title('Run ' + self.run_number)
+        for label in self.det_labels:
+            plt.figure()
+            for i in range(self.cycle_total):
+                plt.plot(sequence_per_cycle[i], mean_amps[label]['N'][i], '-^')
+            plt.legend([str(i) for i in range(self.cycle_total)])
+            plt.xlabel(self.sequence_name)
+            plt.ylabel('Ne amplitude [V]')
+            plt.title('Run ' + self.run_number + ' detection' + label)
 
-        plt.figure()
-        for i in range(self.cycle_total):
-            plt.plot(sequence_per_cycle[i], mean_amps['H'][i], '-v')
-        plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel(self.sequence_name)
-        plt.ylabel('He amplitude [V]')
+            plt.figure()
+            for i in range(self.cycle_total):
+                plt.plot(sequence_per_cycle[i], mean_amps[label]['H'][i], '-v')
+            plt.legend([str(i) for i in range(self.cycle_total)])
+            plt.xlabel(self.sequence_name)
+            plt.ylabel('He amplitude [V]')
 
-        plt.figure()
-        for i in range(self.cycle_total):
-            plt.plot(sequence_per_cycle[i], mean_amps['X'][i], '-x')
-        plt.legend([str(i) for i in range(self.cycle_total)])
-        plt.xlabel(self.sequence_name)
-        plt.ylabel('Xe amplitude [V]')
+            plt.figure()
+            for i in range(self.cycle_total):
+                plt.plot(sequence_per_cycle[i], mean_amps[label]['X'][i], '-x')
+            plt.legend([str(i) for i in range(self.cycle_total)])
+            plt.xlabel(self.sequence_name)
+            plt.ylabel('Xe amplitude [V]')
 
         plt.show()
         return mean_amps
