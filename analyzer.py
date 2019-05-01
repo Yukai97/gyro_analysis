@@ -32,6 +32,7 @@ class RunAnalyzer:
         self.T2 = self.collect_t2()
         self.amps = self.collect_amps()
         self.residuals = self.collect_residuals()
+        self.abs_res_max = self.collect_abs_res_max()
         if self.flag:
             self.shot_number = [i['shotinfo']['shot_number'] for i in self.shot_data]
             self.shot_number_int = list(map(int, self.shot_number))
@@ -117,6 +118,12 @@ class RunAnalyzer:
                 phase_res[label][f] = np.array(phase_res[label][f])
         return phase_res
 
+    def collect_abs_res_max(self):
+        abs_res_max = {}
+        for label in self.det_labels:
+            abs_res_max[label] = [self.shot_data[i][label]['abs_res_max'] for i in range(len(self.shot_data))]
+        return abs_res_max
+
     def get_sequence_per_cycle(self):
         spc = []
         for i in range(self.cycle_total):
@@ -168,6 +175,18 @@ class RunAnalyzer:
                 freq_mean = np.mean(freqs[l][f])
                 chi_square[l][f] = np.sum((freqs[l][f] - freq_mean)**2/freq_errs[l][f]**2)/len(freqs[l][f])
         return chi_square
+
+    def plot_abs_res_max(self):
+        shot_number = self.shot_number_int
+        abs_res_max = self.abs_res_max
+
+        plt.figure()
+        for label in self.det_labels:
+            plt.plot(shot_number, abs_res_max[label], '-o')
+        plt.legend(self.det_labels)
+        plt.xlabel('Shot number')
+        plt.ylabel('abs residual max')
+        plt.show()
 
     def plot_t2(self):
         """Plot T2 of He, Ne, and Xe versus shot number"""
@@ -363,7 +382,7 @@ class RunAnalyzer:
             plt.legend([str(i) for i in range(self.cycle_total)])
             plt.xlabel(self.sequence_name)
             plt.ylabel('Ne amplitude [V]')
-            plt.title('Run ' + self.run_number + ' detection' + label)
+            plt.title('Run ' + self.run_number + ' detection ' + label)
 
             plt.figure()
             for i in range(self.cycle_total):

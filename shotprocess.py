@@ -9,14 +9,15 @@ from gyro_analysis.rawfitter import RawFitter
 from gyro_analysis.scfitter import SClist
 from gyro_analysis.scfitter import ScoReader
 from gyro_analysis.shotinfo import ShotInfo
-from gyro_analysis import ddict
+from gyro_analysis import ddict, default_freq
 import gyro_analysis.local_path as lp
 
 # todo:  Check detection times (Plot vs Laser file?); load detection times from config file
 # todo:  Check phase residuals
 
+HENE_RATIO = 9.650
 
-class ShotProc:
+class ShotProcess:
     """ Analyze a shot with dark time
 
     labelling conventions:
@@ -24,7 +25,7 @@ class ShotProc:
     dark times = 'ab' for dark time between 'a' and 'b'
     """
 
-    def __init__(self, run_number, shot_number, detection_times=None, fitting_paras=ddict,
+    def __init__(self, run_number, shot_number, detection_times=None, block_outlier={}, fitting_paras=ddict,
                  check_raw=False, check_phases=False):
         """ detection_times is 2xN list of detection times
 
@@ -37,19 +38,21 @@ class ShotProc:
         self.shotdir_run = os.path.join(lp.shotdir, self.run_number)
         self.n_det = len(self.det_times)
         self.narr = np.arange(self.n_det)
-        self.labels = ascii_lowercase[:self.n_det]
+        self.det_labels = ascii_lowercase[:self.n_det]
         self.ok = ['y', 'Y']
         self.file_name = '_'.join([self.run_number, self.shot_number])
-        self.check_init()
+        self.block_outlier = dict.fromkeys(self.det_labels, [])
+        self.block_outlier.update(block_outlier)
         self.abs_res_max = np.zeros(self.n_det)
+        self.dark_time_dict = self.init_dark_time()
         self.process_rdt_to_rfo()
         if check_raw:
             self.check_raw_res()
-        self.process_rfo_to_sco()
+        tdict = self.process_rfo_to_sco()
+        self.dark_time_dict.update(tdict)
         if check_phases:
             self.check_phase_res()
-        self.scos = {l: ScoReader(self.run_number, self.shot_number, l) for l in self.labels}
-        self.dark_time_dict = self.calc_dark_time()
+        self.sco_files = {l: ScoReader(self.run_number, self.shot_number, l) for l in self.det_labels}
         self.detection_time_dict = self.load_detection_time()
         self.shotinfo = ShotInfo(self.run_number, self.shot_number)
         self.output_dict = {**self.detection_time_dict, **self.dark_time_dict, 'shotinfo': self.shotinfo.__dict__}
@@ -82,54 +85,70 @@ class ShotProc:
             rf = RawFitter(rd)
             rf.process_blocks()
             self.abs_res_max[i] = rf.abs_res_max
-            rf.write_json(l=self.labels[i])
+            rf.write_json(l=self.det_labels[i])
         return
 
     def process_rfo_to_sco(self):
         """ fit sco files to find frequencies and phases during each detection period """
-        for l in self.labels:
-            sc = SClist(self.run_number, self.shot_number, l)
+        temp_dark = self.dark_time_dict
+        l = self.det_labels[0]
+        sc = [SClist(self.run_number, self.shot_number, l, self.block_outlier[l])]
+        sc[0].write_json()
+        for i in self.narr[1:]:
+            lprev = self.det_labels[i-1]
+            lcurr = self.det_labels[i]
+            scprev = sc[i-1]
+            drop = self.block_outlier[lcurr]
+            ldark = lprev+lcurr
+            len_prev = self.det_times[i-1][1] - self.det_times[i-1][0]
+            time_slip = len_prev - scprev.phase_end_time  # missing bit of time between phase_end and start of dark time
+            time_dark = self.dark_time_dict[ldark]['time_diff']
+            time_offset = time_dark + time_slip
+            phase_guess = {sp: scprev.phase_end[sp] + time_offset*scprev.freq[sp] for sp in scprev.fkeys}
+            phase_guess.pop('CP', None)
+            sc.append(SClist(self.run_number, self.shot_number, lcurr, phase_offset=phase_guess, drop_blocks=drop))
+            sc = sc[i]
             sc.write_json()
-        return
+            # todo: correct phase error; record absolute phases
+            for sp in scprev.fkeys:
+                phase_end_prev = scprev.phase_end[sp] + time_slip*scprev.freq[sp]
+                phdiff = sc.phase_start[sp] - phase_end_prev
+                phdiff_err = np.sqrt(scprev.phase_err[sp] ** 2 + sc.phase_err[sp] ** 2)
+                temp_dark[ldark]['phase_diff'][sp] = phdiff
+                temp_dark[ldark]['phase_diff_err'][sp] = phdiff_err
+                temp_dark[ldark]['freq'][sp] = phdiff/time_dark
+                temp_dark[ldark]['freq_err'][sp] = phdiff_err/time_dark
+        return temp_dark
 
     def process_sco_to_shd(self):
         """ determine dark time frequencies; load and record relevant light time values """
         self.write_json()
         return
 
-    def calc_dark_time(self):
-        """ determine dark time frequencies """
-        dark_time_dict = {}
-        scos = self.scos
+    def init_dark_time(self):
+        """ compute dark time parameters and initialize the dark time dict """
+        temp_dict = {}
         for i in self.narr[:-1]:
-            k1 = self.labels[i]
-            k2 = self.labels[i + 1]
+            k1 = self.det_labels[i]
+            k2 = self.det_labels[i + 1]
             key = k1 + k2
-            time_diff = self.det_times[i + 1][0] - self.det_times[i][1]
-            dark_time_dict[key] = dict(time_diff=time_diff, time_start=self.det_times[i][1],
+            dark_time_length = self.det_times[i + 1][0] - self.det_times[i][1]
+            temp_dict[key] = dict(time_diff=dark_time_length, time_start=self.det_times[i][1],
                                        time_end=self.det_times[i + 1][0],
                                        phase_diff={}, phase_diff_err={},
                                        freq={}, freq_err={})
-            for sp in scos[k1].fkeys:
-                phase_start_guess = scos[k1].phase_end[sp] + scos[k1].freq[sp] * time_diff
-                phase_start = np.unwrap([phase_start_guess, scos[k2].phase_start[sp]])[1]
-                phdf = phase_start - scos[k1].phase_end[sp]
-                phdf_err = np.sqrt(scos[k2].phase_err[sp] ** 2 + scos[k1].phase_err[sp] ** 2)
-                dark_time_dict[key]['phase_diff'][sp] = phdf
-                dark_time_dict[key]['phase_diff_err'][sp] = phdf_err
-                dark_time_dict[key]['freq'][sp] = phdf/time_diff
-                dark_time_dict[key]['freq_err'][sp] = phdf_err/time_diff
-        return dark_time_dict
+            return temp_dict
 
     def load_detection_time(self):
         """ loading detection times """
         detection_time_dict = {}
-        wdfs = self.scos
+        scos = self.sco_files
         det = self.det_times
         for i in self.narr:
-            l = self.labels[i]
+            l = self.det_labels[i]
             detection_time_dict[l] = dict(time_start=det[i][0], time_end=det[i][1])
-            detection_time_dict[l].update(wdfs[l].__dict__)
+            detection_time_dict[l].update(scos[l].__dict__)
+            detection_time_dict[l]['abs_res_max'] = self.abs_res_max[i]
         return detection_time_dict
 
     def write_json(self, l=''):
@@ -152,3 +171,4 @@ class ShotProc:
         ax.set_title('Maximum Residual Seen in Block Fitting')
         plt.show()
 
+so = ShotProcess(33, 0, [[25,125], [225, 325]])

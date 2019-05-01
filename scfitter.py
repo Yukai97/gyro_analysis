@@ -32,9 +32,9 @@ HENE_RATIO = 9.650
 
 class SClist:
     """
-    Stores and manipulates a list of SCdat objects plus a header.
+    Stores and manipulates a list of RawBlock objects plus a header.
 
-    SClist.l contains the list of SCdat o917-957-3766bjects one for each block
+    SClist.block_data contains the list of RawBlock objects one for each block
     SClist.fkeys  contains a list of the species whose signals are being computed.
     SClist.amps, contains amplitudes for each signal
     SClist.total_phases contains phases for each signal
@@ -47,29 +47,33 @@ class SClist:
 
     """
 
-    def __init__(self, run_number, shot_number, label):
+    def __init__(self, run_number, shot_number, label, phase_offset={}, drop_blocks=[]):
         self.label = label
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
         self.file_name = '_'.join([self.run_number, self.shot_number])+self.label
+        self.phase_offset = phase_offset   # Expected initial phase for Helium and Neon.  Needed when analyzing dark times
         self.hene_ratio = HENE_RATIO
         self.shotinfo = ShotInfo(run_number, shot_number)
-        self.scodir_run = os.path.join(lp.scodir, self.run_number)
+        self.outdir = os.path.join(lp.scodir, self.run_number)
         self.fullname = os.path.join(lp.rfodir, self.run_number, self.file_name + lp.sc_ex_in)
         with open(self.fullname, 'r') as read_data:
             data = jsont.load(read_data)
         self.hdr = data[-1]
-        self.l = data[:-1]
-        self.keys = list(self.l[0].keys())
-        self.fkeys = list(self.l[0]['w'].keys())
-        self.dt = self.l[0]['dt']
+        self.block_data = data[:-1]
+        self.block_index = np.array(list(range(len(self.block_data))))
+        self.drop_blocks = drop_blocks
+        self.block_mask = np.invert(np.isin(self.block_index, self.drop_blocks))
+        self.keys = list(self.block_data[0].keys())
+        self.fkeys = list(self.block_data[0]['w'].keys())
+        self.dt = self.block_data[0]['dt']
         self.amp_phase()
-        self.time = np.array([i['start'] * self.dt for i in self.l])
-        self.end_time = self.l[-1]['end'] * self.dt
+        self.time = np.array([i['start'] * self.dt for i in self.block_data])
+        self.end_time = self.block_data[-1]['end'] * self.dt
         self.amps = self.collect_amps()
         self.block_phases = self.collect_block_phases()
 
-        self.bl = (self.l[0]['end'] - self.l[0]['start']) * self.dt
+        self.bl = (self.block_data[0]['end'] - self.block_data[0]['start']) * self.dt
         self.total_phases = self.collect_total_phases()
         self.ne_corr = self.corrected_phases()
         self.T2 = self.fit_T2()
@@ -85,6 +89,8 @@ class SClist:
         self.phase_end = self.fp['phase_end']
         self.phase_err = self.fp['phase_start_err']
         self.residuals = self.res_dict['res_start']
+        self.n_blocks = len(self.residuals[self.fkeys[0]])
+        self.phase_end_time = self.bl * (self.n_blocks - 1)  # time of phase_end point.
 
     def amp_phase(self):
         """
@@ -94,7 +100,7 @@ class SClist:
 
         :return:
         """
-        for el in self.l:
+        for el in self.block_data:
             el['amp'] = {}
             el['bp'] = {}
             for f in self.fkeys:
@@ -112,7 +118,7 @@ class SClist:
         """
         pdict = {}
         for f in self.fkeys:
-            pdict[f] = [el['bp'][f] for el in self.l]
+            pdict[f] = [el['bp'][f] for el in self.block_data]
         return pdict
 
     def collect_amps(self):
@@ -123,7 +129,7 @@ class SClist:
         """
         adict = {}
         for f in self.fkeys:
-            adict[f] = [el['amp'][f] for el in self.l]
+            adict[f] = [el['amp'][f] for el in self.block_data]
         return adict
 
     def collect_total_phases(self):
@@ -132,16 +138,21 @@ class SClist:
 
         :return:  dict
         """
-        l = self.l
+        l = self.block_data
         for el in l:
             el['tp'] = {}
         tot_ph_dict = {}
         for fk in self.fkeys:
-            freq = l[0]['w'][fk]
-            phase_per_block = freq * self.bl
+            init_phase = 0
             block_ph = self.block_phases[fk]
             total_ph = np.zeros_like(block_ph)
-            total_ph[0] = block_ph[0]
+            if fk in self.phase_offset:
+                init_phase = self.phase_offset[fk]  # if expected phase at start is known, use it
+                total_ph[0] = np.unwrap([init_phase, block_ph[0]])[1]
+            else:
+                total_ph[0] = block_ph[0]
+            freq = l[0]['w'][fk]
+            phase_per_block = freq * self.bl
             l[0]['tp'][fk] = total_ph[0]
             for j in range(1, len(block_ph)):
                 guess = total_ph[j - 1] + phase_per_block
@@ -161,8 +172,8 @@ class SClist:
         he_ph = self.total_phases['H']
         corr_ne_ph = ne_ph - gr * he_ph
         self.total_phases['CP'] = corr_ne_ph
-        for i in range(len(self.l)):
-            self.l[i]['tp']['CP'] = corr_ne_ph[i]
+        for i in range(len(self.block_data)):
+            self.block_data[i]['tp']['CP'] = corr_ne_ph[i]
         return corr_ne_ph
 
     def fit_T2(self):
@@ -203,12 +214,13 @@ class SClist:
         res_start = {}
         res_end = {}
 
-        t1 = self.time
-        t2 = self.time-self.time[-1]  # renumber so last point is 0 to find phase at the end of the section
+        t1 = self.time[self.block_mask]
+        # renumber so last point is 0 to find phase at the end of the section
+        t2 = self.time[self.block_mask] - self.time[-1]
         bf1 = np.array([np.ones_like(t1), t1]).transpose()
         bf2 = np.array([np.ones_like(t2), t2]).transpose()
         for f in self.fkeys:
-            phases = self.total_phases[f]
+            phases = np.array(self.total_phases[f])[self.block_mask]
             lf1 = opt.lsq_linear(bf1, phases, tol=1e-16)
             lf2 = opt.lsq_linear(bf2, phases, tol=1e-16)
             if not lf1['success'] or not lf2['success']:
@@ -252,7 +264,7 @@ class SClist:
         :return:
         """
         fig, ax = plt.subplots()
-        ax.plot(self.time, [i['amp'][fk] for i in self.l])
+        ax.plot(self.time, [i['amp'][fk] for i in self.block_data])
         ax.set_ylabel('{} Amplitude [V]'.format(fk + 'e'))
         ax.set_xlabel('Time [s]')
         plt.subplots_adjust(left=0.17)
@@ -261,28 +273,32 @@ class SClist:
         return fig, ax
 
     def plot_phase(self, fk):
+        time = self.time[self.block_mask]
         fig, ax = plt.subplots()
-        ax.plot(self.time, [i['tp'][fk] for i in self.l])
-        ax.set_ylabel('{} Amplitude [V]'.format(fk + 'e'))
+        real_phase = np.array([i['tp'][fk] for i in self.block_data])
+        fitting_phase = self.phase_start[fk] + self.freq[fk] * time
+        ax.plot(time, real_phase[self.block_mask], 'o', time, fitting_phase, '-')
+        ax.legend(['phase', 'fitting'])
+        ax.set_ylabel('{} Phase'.format(fk))
         ax.set_xlabel('Time [s]')
         plt.subplots_adjust(left=0.17)
         plt.subplots_adjust(bottom=0.17)
-        ax.set_title('Run {}, block length {}'.format(self.file_name, self.bl))
+        ax.set_title(str(self.run_number).zfill(4) + '-' + str(self.shot_number).zfill(3) + '-' + self.label)
         return fig, ax
 
     def plot_phase_res(self):
         """ Plot Ne, He, corrected residuals after linear fit """
 
         r = self.residuals
-        t = self.time
+        t = self.time[self.block_mask]
         fig, ax = plt.subplots(3, 1, sharex=True)
-        ax[0].plot(t, r['N'])
+        ax[0].plot(t, r['N'], '-o')
         ax[0].set_ylabel('Ne')
         # ax[0].set_ylabel('Ne phase \nres. [rad]')
-        ax[1].plot(t, r['H'])
+        ax[1].plot(t, r['H'], '-o')
         ax[1].set_ylabel('He')
         # ax[1].set_ylabel('He phase \nres. [rad]')
-        ax[2].plot(t, r['CP'])
+        ax[2].plot(t, r['CP'], '-o')
         ax[2].set_ylabel('Ne (B-inv)')
         # ax[2].set_ylabel('B-inv. phase \nres. (Ne) [rad]')
         big_ax = fig.add_subplot(111, frameon=False)
@@ -315,16 +331,17 @@ class SClist:
         """
 
         file_name = self.file_name + l
-        if not os.path.isdir(self.scodir_run):
-            os.makedirs(self.scodir_run)
-        file_path = os.path.join(self.scodir_run, file_name + lp.sc_ex_out)
+        if not os.path.isdir(self.outdir):
+            os.makedirs(self.outdir)
+        file_path = os.path.join(self.outdir, file_name + lp.sc_ex_out)
 
         f = open(file_path, 'w')
         output_dict = {'fkeys': self.fkeys, 'freq': self.freq,
                        'freq_err': self.freq_err, 'residuals': self.residuals,
                        'T2': self.T2, 'amps': self.amps, 'phase_start': self.phase_start,
                        'phase_end': self.phase_end, 'phase_err': self.phase_err,
-                       'block length': self.bl}
+                       'block length': self.bl, 'n_blocks': self.n_blocks,
+                       'phase_end_time': self.phase_end_time}
         json_output = jsont.dumps(output_dict)
         f.write(json_output)
         f.close()
@@ -352,3 +369,5 @@ class ScoReader:
         self.phase_end = scdata['phase_end']
         self.phase_err = scdata['phase_err']
         self.bl = scdata['block length']
+        self.n_blocks = len(self.residuals[self.fkeys[0]])
+        self.phase_end_time = self.bl * (self.n_blocks - 1)  # time of phase_end point.
