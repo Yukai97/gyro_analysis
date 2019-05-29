@@ -1,3 +1,5 @@
+""" Written by William Terrano and Yukai Lu March 2019 """
+
 import matplotlib as mpl
 import numpy as np
 import os
