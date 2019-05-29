@@ -20,9 +20,9 @@ sp_out = '.shd'
 shot_header = '.hdr'
 
 class paths:
-    #homedir = r"C:\Users\Romalis Group\Desktop\New Data"
-    homedir = r"/Users/William/Library/Mobile Documents/com~apple~CloudDocs/Work/" \
-              r"Active Projects/HE-NE/Code/B30/Data"
+    homedir = r"C:\Users\Romalis Group\Desktop\New Data"
+    #homedir = r"/Users/William/Library/Mobile Documents/com~apple~CloudDocs/Work/" \
+    #          r"Active Projects/HE-NE/Code/B30/Data"
     rawdir = os.path.join(homedir, 'Raw data')
     infodir = os.path.join(homedir, 'Info data')
     rfodir = os.path.join(homedir, 'RFO data')
