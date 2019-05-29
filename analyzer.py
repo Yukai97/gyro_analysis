@@ -2,9 +2,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 import json_tricks as jsont
-from gyro_analysis.local_path import shotdir
+from gyro_analysis.local_path import paths as pt
+shotdir = pt.shotdir
 from string import ascii_lowercase
-
 
 class RunAnalyzer:
     """Analyze all shot data files in the same run specified by the run_number and plot related figures

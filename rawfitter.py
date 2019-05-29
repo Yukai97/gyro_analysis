@@ -10,7 +10,8 @@ from scipy import optimize as opt, signal
 
 from gyro_analysis import fH, fN, default_freq, ave_array, freqlist
 from gyro_analysis.rawdata import RawData
-from gyro_analysis import local_path as lp
+from gyro_analysis.local_path import paths as lp
+from gyro_analysis.local_path import extensions as ext
 
 
 class RawFitter:
@@ -283,7 +284,7 @@ class RawFitter:
         rfodir_run = os.path.join(lp.rfodir, self.raw.run_number)
         if not os.path.isdir(rfodir_run):
             os.makedirs(rfodir_run)
-        wn = os.path.join(rfodir_run, fname + lp.rf_ex_out)
+        wn = os.path.join(rfodir_run, fname + ext.rf_out)
         f = open(wn, 'w')
         lst = deepcopy(self.blist)
         lst.append(hdr)

@@ -9,7 +9,8 @@ import matplotlib as mpl
 import os
 import json_tricks as jsont
 from gyro_analysis.shotinfo import ShotInfo
-import gyro_analysis.local_path as lp
+from gyro_analysis.local_path import paths as lp
+from gyro_analysis.local_path import extensions as ext
 
 mpl.rcParams['figure.figsize'] = [8.0, 6.0]
 mpl.rcParams['figure.dpi'] = 80
@@ -56,7 +57,7 @@ class SClist:
         self.hene_ratio = HENE_RATIO
         self.shotinfo = ShotInfo(run_number, shot_number)
         self.outdir = os.path.join(lp.scodir, self.run_number)
-        self.fullname = os.path.join(lp.rfodir, self.run_number, self.file_name + lp.sc_ex_in)
+        self.fullname = os.path.join(lp.rfodir, self.run_number, self.file_name + ext.sc_in)
         with open(self.fullname, 'r') as read_data:
             data = jsont.load(read_data)
         self.hdr = data[-1]
@@ -333,7 +334,7 @@ class SClist:
         file_name = self.file_name + l
         if not os.path.isdir(self.outdir):
             os.makedirs(self.outdir)
-        file_path = os.path.join(self.outdir, file_name + lp.sc_ex_out)
+        file_path = os.path.join(self.outdir, file_name + ext.sc_out)
 
         f = open(file_path, 'w')
         output_dict = {'fkeys': self.fkeys, 'freq': self.freq,
@@ -355,7 +356,7 @@ class ScoReader:
         self.label = label
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
-        self.file_name = '_'.join([self.run_number, self.shot_number])+label+lp.sc_ex_out
+        self.file_name = '_'.join([self.run_number, self.shot_number])+label+ext.sc_out
         self.full_name = os.path.join(lp.scodir, self.run_number, self.file_name)
         with open(self.full_name, 'r') as read_data:
             scdata = jsont.load(read_data)
