@@ -5,7 +5,8 @@ from matplotlib import pyplot as plt
 from scipy import signal
 
 from gyro_analysis import ddict, ave_array
-from gyro_analysis import local_path as lp
+from gyro_analysis.local_path import paths as lp
+from gyro_analysis.local_path import extensions as ext
 
 
 class RawData:
@@ -37,14 +38,14 @@ class RawData:
 
     def load_data(self):
         while True:
-            file_name = self.file_name + lp.rd_ex_in
+            file_name = self.file_name + ext.rd_in
             full_file = os.path.join(self.rawdir_run, file_name)
             try:
                 raw_data = np.loadtxt(full_file)
                 break
             except FileNotFoundError:
                 inp = [0, 0]
-                file_name = self.file_name + lp.rd_ex_in
+                file_name = self.file_name + ext.rd_in
                 print('File name {} in directory {} not found.'.format(file_name, self.rawdir_run))
                 inp[0] = input('Enter run directory [{}] or x to exit:'.format(self.run_number)) or self.run_number
                 inp[1] = input('Enter file name  to analyze [{}] or x to exit): '.format(file_name)) or file_name

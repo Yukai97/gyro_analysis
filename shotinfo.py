@@ -1,6 +1,7 @@
 import json
 import time
-import gyro_analysis.local_path as lp
+from gyro_analysis.local_path import paths as lp
+from gyro_analysis.local_path import extensions as ext
 import os
 
 
@@ -15,7 +16,7 @@ class ShotInfo:
         self.run_number = '{:04d}'.format(int(run_number))
         self.shot_number = '{:03d}'.format(int(shot_number))
         self.file_name = '_'.join([self.run_number, self.shot_number])
-        file_path = os.path.join(lp.infodir, self.run_number, self.file_name + lp.shot_ex_header)
+        file_path = os.path.join(lp.infodir, self.run_number, self.file_name + ext.shot_header)
         try:
             read_header = open(file_path, 'r')
             self.exists = True
@@ -35,7 +36,7 @@ class ShotInfo:
             read_header.close()
 
     def get_timestamp(self):
-        full_file = os.path.join(lp.rawdir, self.run_number, self.file_name + lp.rd_ex_in)
+        full_file = os.path.join(lp.rawdir, self.run_number, self.file_name + ext.rd_in)
         t = os.path.getctime(full_file)
         tmptime = time.localtime(t)
         return time.strftime('%Y-%m-%d', tmptime)

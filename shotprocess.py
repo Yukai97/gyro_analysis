@@ -11,7 +11,8 @@ from gyro_analysis.scfitter import ScoReader
 from gyro_analysis.shotinfo import ShotInfo
 from gyro_analysis import ddict, default_freq
 from gyro_analysis import freqlist
-import gyro_analysis.local_path as lp
+from gyro_analysis.local_path import paths as lp
+from gyro_analysis.local_path import extensions as ext
 
 # todo:  Check detection times (Plot vs Laser file?); load detection times from config file
 # todo:  Check phase residuals
@@ -93,32 +94,41 @@ class ShotProcess:
         """ fit sco files to find frequencies and phases during each detection period """
         temp_dark = self.dark_time_dict
         l = self.det_labels[0]
+        # Fit first segment
         sc = [SClist(self.run_number, self.shot_number, l, self.block_outlier[l])]
         sc[0].write_json()
-        for i in self.narr[1:]:
-            lprev = self.det_labels[i-1]
-            lcurr = self.det_labels[i]
-            scprev = sc[i-1]
+        for seg in self.narr[1:]:
+            # fit subsequent detection segment based on previous segment prediction of phase etc.
+            lprev = self.det_labels[seg-1]
+            lcurr = self.det_labels[seg]
+            scprev = sc[seg-1]
             drop = self.block_outlier[lcurr]
             ldark = lprev+lcurr
-            len_prev = self.det_times[i-1][1] - self.det_times[i-1][0]
+            len_prev = self.det_times[seg-1][1] - self.det_times[seg-1][0]
             time_slip = len_prev - scprev.phase_end_time  # missing bit of time between phase_end and start of dark time
             time_dark = self.dark_time_dict[ldark]['time_diff']
             time_offset = time_dark + time_slip
-            phase_guess = {sp: scprev.phase_end[sp] + time_offset*scprev.freq[sp] for sp in scprev.fkeys}
+            phase_guess = {species: scprev.phase_end[species] + time_offset*scprev.freq[species] for species in scprev.fkeys}
             phase_guess.pop('CP', None)
             sc.append(SClist(self.run_number, self.shot_number, lcurr, phase_offset=phase_guess, drop_blocks=drop))
-            sc = sc[i]
+            sc = sc[seg]
             sc.write_json()
-            # todo: correct phase error; record absolute phases
-            for sp in scprev.fkeys:
-                phase_end_prev = scprev.phase_end[sp] + time_slip*scprev.freq[sp]
-                phdiff = sc.phase_start[sp] - phase_end_prev
-                phdiff_err = np.sqrt(scprev.phase_err[sp] ** 2 + sc.phase_err[sp] ** 2)
-                temp_dark[ldark]['phase_diff'][sp] = phdiff
-                temp_dark[ldark]['phase_diff_err'][sp] = phdiff_err
-                temp_dark[ldark]['freq'][sp] = phdiff/time_dark
-                temp_dark[ldark]['freq_err'][sp] = phdiff_err/time_dark
+            for species in scprev.fkeys:
+                # get dark time results from previous and next detection times
+                prevph_end = scprev.phase_end[species] + time_slip*scprev.freq[species]
+                prevph_err = np.sqrt(scprev.phase_err[species]**2 + (time_slip*scprev.freq_err[species]**2))
+                nextph_start = sc.phase_start[species]
+                nextph_err = sc.phase_err[species]
+                phdiff = nextph_start - prevph_end
+                phdiff_err = np.sqrt(prevph_err ** 2 + nextph_err ** 2)
+                temp_dark[ldark]['dark_start_phase'][species] = prevph_end
+                temp_dark[ldark]['dark_start_err'][species] = prevph_err
+                temp_dark[ldark]['dark_end_phase'][species] = nextph_start
+                temp_dark[ldark]['dark_end_err'][species] = nextph_err
+                temp_dark[ldark]['phase_diff'][species] = phdiff
+                temp_dark[ldark]['phase_diff_err'][species] = phdiff_err
+                temp_dark[ldark]['freq'][species] = phdiff/time_dark
+                temp_dark[ldark]['freq_err'][species] = phdiff_err/time_dark
         return temp_dark
 
     def process_sco_to_shd(self):
@@ -157,7 +167,7 @@ class ShotProcess:
         file_name = self.file_name + l
         if not os.path.isdir(self.shotdir_run):
             os.makedirs(self.shotdir_run)
-        file_path = os.path.join(self.shotdir_run, file_name + lp.sp_ex_out)
+        file_path = os.path.join(self.shotdir_run, file_name + ext.sp_out)
         od = self.output_dict
         f = open(file_path, 'w')
         json_output = jsont.dumps(od)
