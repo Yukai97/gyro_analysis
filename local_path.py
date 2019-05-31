@@ -1,6 +1,6 @@
 import os
 
-homedir = r"C:\Users\Romalis Group\Desktop\New Data"
+homedir = r"D:\gyro_data\Data"
 rawdir = os.path.join(homedir, 'Raw data')
 infodir = os.path.join(homedir, 'Info data')
 rfodir = os.path.join(homedir, 'RFO data')
@@ -14,4 +14,5 @@ sc_ex_in = '.rfo'
 sc_ex_out = '.sco'
 sp_ex_in = '.sco'
 sp_ex_out = '.shd'
+shot_ex_data = '.shd'
 shot_ex_header = '.hdr'

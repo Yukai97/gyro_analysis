@@ -10,6 +10,7 @@ from gyro_analysis.scfitter import SClist
 from gyro_analysis.scfitter import ScoReader
 from gyro_analysis.shotinfo import ShotInfo
 from gyro_analysis import ddict, default_freq
+from gyro_analysis import freqlist
 import gyro_analysis.local_path as lp
 
 # todo:  Check detection times (Plot vs Laser file?); load detection times from config file
@@ -26,7 +27,7 @@ class ShotProcess:
     """
 
     def __init__(self, run_number, shot_number, detection_times=None, block_outlier={}, fitting_paras=ddict,
-                 check_raw=False, check_phases=False):
+                 check_raw=False, check_phases=False, freq2fit=freqlist, wC=False):
         """ detection_times is 2xN list of detection times
 
         keywords 'check_xxx' allow user to have validation plots displayed
@@ -45,7 +46,7 @@ class ShotProcess:
         self.block_outlier.update(block_outlier)
         self.abs_res_max = np.zeros(self.n_det)
         self.dark_time_dict = self.init_dark_time()
-        self.process_rdt_to_rfo()
+        self.process_rdt_to_rfo(freq2fit=freq2fit, wC=wC)
         if check_raw:
             self.check_raw_res()
         tdict = self.process_rfo_to_sco()
@@ -76,13 +77,13 @@ class ShotProcess:
         print('check_phase_res not yet implemented')
         return
 
-    def process_rdt_to_rfo(self):
+    def process_rdt_to_rfo(self, freq2fit, wC):
         """ run fitters on each detection time and write output files """
         fp = self.parameters
         for i in self.narr:
             fp['roi'] = self.det_times[i]
             rd = RawData(self.run_number, self.shot_number, fp)
-            rf = RawFitter(rd)
+            rf = RawFitter(rd, freqs2fit=freq2fit, wC=wC)
             rf.process_blocks()
             self.abs_res_max[i] = rf.abs_res_max
             rf.write_json(l=self.det_labels[i])
