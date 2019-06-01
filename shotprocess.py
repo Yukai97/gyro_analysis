@@ -129,6 +129,7 @@ class ShotProcess:
                 temp_dark[ldark]['phase_diff_err'][species] = phdiff_err
                 temp_dark[ldark]['freq'][species] = phdiff/time_dark
                 temp_dark[ldark]['freq_err'][species] = phdiff_err/time_dark
+            temp_dark[ldark]['label'] = ldark
         return temp_dark
 
     def process_sco_to_shd(self):
@@ -181,5 +182,3 @@ class ShotProcess:
         ax.set_ylabel('Residual')
         ax.set_title('Maximum Residual Seen in Block Fitting')
         plt.show()
-
-so = ShotProcess(33, 0, [[25,125], [225, 325]])

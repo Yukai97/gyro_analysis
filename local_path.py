@@ -38,7 +38,7 @@ sc_ex_in = ext.sc_in
 sc_ex_out = ext.sc_out
 sp_ex_in = ext.sp_in
 sp_ex_out = ext.sp_out
-shot_ex_data = ext.sho
+shot_ex_data = ext.sp_out
 shot_ex_header = ext.shot_header
 
 rd_in = ext.rd_in
