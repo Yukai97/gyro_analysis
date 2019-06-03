@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 from gyro_analysis.local_path import paths as pt
 from gyro_analysis.shot_frame import ShotFrame
+from copy import deepcopy
 shotdir = pt.shotdir
 
 
@@ -51,7 +52,8 @@ class RunDataFrame:
 
     def plot_freqs_shot(self):
         run_frame = self.run_frame.reset_index()
-        run_frame['shot_number'] = pd.to_numeric(run_frame['shot_number'])
+        shot_number = pd.to_numeric(run_frame['shot_number'])
+        run_frame['shot_number'] = shot_number
         run_frame = run_frame.set_index(['run_number', 'label', 'shot_number'])
 
         fkey_num = len(self.fkeys)
@@ -89,15 +91,17 @@ class RunDataFrame:
                     for l in self.dark_labels:
                         error_bar = run_frame[freq_err_name][i][l]
                         run_frame[freq_name][i][l].plot(yerr=error_bar, ax=ax, fmt='-' + self.markers[key])
+                    x_axis = list(run_frame[freq_name][i][l].index)
                     ax.set_xlabel('shot number')
                     ax.set_ylabel('$\omega_{' + key + '}$')
+                    ax.set_xlim(min(x_axis)-2, max(x_axis)+2)
                     ax.legend(self.dark_labels, fontsize=fontsize)
 
     def plot_amps_shot(self):
         run_frame = self.run_frame.reset_index()
         run_frame['shot_number'] = pd.to_numeric(run_frame['shot_number'])
         run_frame = run_frame.set_index(['run_number', 'label', 'shot_number'])
-        fkeys = self.fkeys
+        fkeys = deepcopy(self.fkeys)
         if 'CP' in fkeys:
             fkeys.remove('CP')
         fontsize = 14
@@ -110,8 +114,10 @@ class RunDataFrame:
                 for l in self.det_labels:
                     legend.append(key + ' ' + l)
                     run_frame[amp_name][i][l].plot(style='-' + self.markers[key])
+            x_axis = list(run_frame[amp_name][i][l].index)
             plt.xlabel('Shot number')
             plt.ylabel('Amplitude [V]')
+            plt.xlim(min(x_axis)-2, max(x_axis)+2)
             plt.legend(legend, fontsize=fontsize)
 
     def plot_abs_res_max(self):
@@ -123,6 +129,43 @@ class RunDataFrame:
             plt.title('Run ' + i)
             for l in self.det_labels:
                 run_frame['abs_res_max'][i][l].plot(style='-o')
+            x_axis = list(run_frame['abs_res_max'][i][l].index)
             plt.xlabel('Shot number')
             plt.ylabel('Abs res max')
-            plt.legend(self.run_number)
+            plt.xlim(min(x_axis)-2, max(x_axis)+2)
+            plt.legend(self.det_labels)
+
+    def plot_freqs_sequence(self):
+        run_frame = self.run_frame.reset_index()
+        fkey_num = len(self.fkeys)
+        col = 2
+        row = math.ceil(fkey_num / col)
+        figsize = (col * 6, row * 4)
+        wspace = 0.25
+        hspace = 0.4
+        fontsize = 14
+        for i in self.run_number:
+            cycle_number = list(set(pd.to_numeric(run_frame['cycle_number'])))
+            run_frame['sequence_var'] = pd.to_numeric(run_frame['sequence_var'])
+            run_frame = run_frame.set_index(['run_number', 'label', 'cycle_number', 'sequence_var'])
+            for l in self.labels:
+                fig, axes = plt.subplots(row, col, figsize=figsize)
+                plt.subplots_adjust(wspace=wspace, hspace=hspace)
+                fig.suptitle('Run ' + i + ' ' + l)
+                for j in range(len(self.fkeys)):
+                    key = self.fkeys[j]
+                    freq_name = 'freq_' + key
+                    freq_err_name = 'freq_err_' + key
+                    ax = axes[int(j / col)][j % col]
+                    legend = []
+                    for m in cycle_number:
+                        cycle_index = str(m)
+                        legend.append(cycle_index)
+                        error_bar = run_frame[freq_err_name][i][l][cycle_index]
+                        run_frame[freq_name][i][l][cycle_index].plot(yerr=error_bar, ax=ax, fmt='-' + self.markers[key])
+                    x_axis = list(run_frame[freq_name][i][l][cycle_index].index)
+                    ax.set_xlabel('Sequence var')
+                    ax.set_ylabel('$\omega_{' + key + '}$')
+                    ax.set_xlim(min(x_axis)-2, max(x_axis)+2)
+                    ax.legend(legend, fontsize=fontsize)
+
