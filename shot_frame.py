@@ -55,6 +55,13 @@ class ShotFrame:
         shot_info_frame = self.build_info_frame()
         shot_frame = pd.concat([shot_data_frame, shot_info_frame], axis=1)
         shot_frame = shot_frame.set_index('label')
+        shot_frame['run_number'] = pd.to_numeric(shot_frame['run_number'])
+        shot_frame['shot_number'] = pd.to_numeric(shot_frame['shot_number'])
+        shot_frame['cycle_number'] = pd.to_numeric(shot_frame['cycle_number'])
+        shot_frame['sequence_var'] = pd.to_numeric(shot_frame['sequence_var'])
+        shot_frame['ne_angle'] = pd.to_numeric(shot_frame['ne_angle'])
+        shot_frame['xe_angle'] = pd.to_numeric(shot_frame['xe_angle'])
+        shot_frame['he_angle'] = pd.to_numeric((shot_frame['he_angle']))
         return shot_frame
 
     def build_data_frame(self):

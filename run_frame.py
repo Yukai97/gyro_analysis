@@ -57,8 +57,6 @@ class RunDataFrame:
 
     def plot_freqs_shot(self):
         run_frame = self.run_frame.reset_index()
-        shot_number = pd.to_numeric(run_frame['shot_number'])
-        run_frame['shot_number'] = shot_number
         run_frame = run_frame.set_index(['run_number', 'label', 'shot_number'])
 
         fkey_num = len(self.fkeys)
@@ -104,7 +102,6 @@ class RunDataFrame:
 
     def plot_amps_shot(self):
         run_frame = self.run_frame.reset_index()
-        run_frame['shot_number'] = pd.to_numeric(run_frame['shot_number'])
         run_frame = run_frame.set_index(['run_number', 'label', 'shot_number'])
         fkeys = deepcopy(self.fkeys)
         if 'CP' in fkeys:
@@ -127,7 +124,6 @@ class RunDataFrame:
 
     def plot_abs_res_max(self):
         run_frame = self.run_frame.reset_index()
-        run_frame['shot_number'] = pd.to_numeric(run_frame['shot_number'])
         run_frame = run_frame.set_index(['run_number', 'label', 'shot_number'])
         for i in self.run_number:
             plt.figure()
@@ -150,8 +146,7 @@ class RunDataFrame:
         hspace = 0.4
         fontsize = 14
         for i in self.run_number:
-            cycle_number = list(set(pd.to_numeric(run_frame['cycle_number'])))
-            run_frame['sequence_var'] = pd.to_numeric(run_frame['sequence_var'])
+            cycle_number = list(set(run_frame['cycle_number']))
             run_frame = run_frame.set_index(['run_number', 'label', 'cycle_number', 'sequence_var'])
             for l in self.labels:
                 fig, axes = plt.subplots(row, col, figsize=figsize)
@@ -197,7 +192,7 @@ class RunDataFrame:
                 fit_formula = formula[:index] + '_N' + formula[index:]
             for l in self.dark_labels:
                 fit_frame = run_frame.loc[(i, l), ['freq_CP', 'freq_err_CP', 'M0_H', 'M0_N']]
-                fit_frame['angle'] = pd.to_numeric(run_frame.loc[(i, l), 'sequence_var']).apply(np.radians)
+                fit_frame['angle'] = run_frame.loc[(i, l), 'sequence_var'].apply(np.radians)
                 model = smf.ols(formula=fit_formula, data=fit_frame)
                 results = model.fit()
                 params = results.params
