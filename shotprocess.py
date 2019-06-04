@@ -146,9 +146,9 @@ class ShotProcess:
             key = k1 + k2
             dark_time_length = self.det_times[i + 1][0] - self.det_times[i][1]
             temp_dict[key] = dict(time_diff=dark_time_length, time_start=self.det_times[i][1],
-                                       time_end=self.det_times[i + 1][0],
-                                       phase_diff={}, phase_diff_err={},
-                                       freq={}, freq_err={})
+                                  time_end=self.det_times[i + 1][0], phase_diff={}, phase_diff_err={}, freq={},
+                                  freq_err={}, dark_start_phase={}, dark_start_err={}, dark_end_phase={},
+                                  dark_end_err={})
             return temp_dict
 
     def load_detection_time(self):

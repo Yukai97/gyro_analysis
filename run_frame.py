@@ -1,11 +1,16 @@
 import math
+import numpy as np
+import statsmodels.api as sm
 import os
+import sys
 from matplotlib import pyplot as plt
 import pandas as pd
 from gyro_analysis.local_path import paths as pt
 from gyro_analysis.shot_frame import ShotFrame
 from copy import deepcopy
 shotdir = pt.shotdir
+from gyro_analysis import mu_0, gamma_ne
+import statsmodels.formula.api as smf
 
 
 class RunDataFrame:
@@ -135,7 +140,7 @@ class RunDataFrame:
             plt.xlim(min(x_axis)-2, max(x_axis)+2)
             plt.legend(self.det_labels)
 
-    def plot_freqs_sequence(self):
+    def plot_freqs_sequence(self, legend_switch=True):
         run_frame = self.run_frame.reset_index()
         fkey_num = len(self.fkeys)
         col = 2
@@ -167,5 +172,48 @@ class RunDataFrame:
                     ax.set_xlabel('Sequence var')
                     ax.set_ylabel('$\omega_{' + key + '}$')
                     ax.set_xlim(min(x_axis)-2, max(x_axis)+2)
-                    ax.legend(legend, fontsize=fontsize)
+                    if legend_switch:
+                        ax.legend(legend, fontsize=fontsize)
+
+    def calc_kappa(self, formula='freq_CP ~ M0 : np.cos(angle) + np.cos(angle)'):
+        run_frame = self.run_frame.reset_index()
+        run_frame = run_frame.set_index(['run_number', 'label'])
+        kappa_res_list = []
+        if 'M0' not in formula:
+            print('The formula is incorrect!')
+            sys.exit()
+        for i in self.run_number:
+            if pd.Series.equals(run_frame['ne_angle'][i], run_frame['sequence_var'][i]):
+                seq_name = 'N'
+            elif pd.Series.equals(run_frame['he_angle'][i], run_frame['sequence_var'][i]):
+                seq_name = 'H'
+            else:
+                print('The sequence is incorrect!')
+                sys.exit()
+            if 'M0_H' in formula or 'M0_N' in formula:
+                fit_formula = formula
+            else:
+                index = formula.find('M0') + 2
+                fit_formula = formula[:index] + '_N' + formula[index:]
+            for l in self.dark_labels:
+                fit_frame = run_frame.loc[(i, l), ['freq_CP', 'freq_err_CP', 'M0_H', 'M0_N']]
+                fit_frame['angle'] = pd.to_numeric(run_frame.loc[(i, l), 'sequence_var']).apply(np.radians)
+                model = smf.ols(formula=fit_formula, data=fit_frame)
+                results = model.fit()
+                params = results.params
+                error_bars = results.bse
+                if seq_name == 'N':
+                    kappa_he_ne = -params[1]/gamma_ne/mu_0
+                    kappa_he_ne_err = error_bars[1]/gamma_ne/mu_0
+                else:
+                    kappa_he_ne = params[1]/gamma_ne/mu_0
+                    kappa_he_ne_err = error_bars[1]/gamma_ne/mu_0
+                kappa_series = pd.Series({'run_number': i, 'label': l, 'seq_name': seq_name, 'kappa_he_ne': kappa_he_ne,
+                                          'kappa_he_err': kappa_he_ne_err, 'fit_results': results,
+                                          'fit_formula': fit_formula})
+                kappa_res_list.append(kappa_series)
+                residuals = results.resid
+        kappa_data_frame = pd.DataFrame(kappa_res_list)
+        return kappa_data_frame
+
 

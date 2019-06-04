@@ -4,6 +4,11 @@ from gyro_analysis import local_path as lp
 from gyro_analysis.shotinfo import ShotInfo
 import pandas as pd
 import numpy as np
+from gyro_analysis import mu_0
+from gyro_analysis import kappa_ne_rb
+from gyro_analysis import kappa_he_rb
+from gyro_analysis import calibration_factor as C
+kappa_rb = {'kappa_H': kappa_he_rb, 'kappa_N': kappa_ne_rb}
 
 
 class ShotFrame:
@@ -23,6 +28,7 @@ class ShotFrame:
         self.unpack_fkeys = ['H', 'N', 'X', 'CP']
         self.unpack_dicts(['freqs', 'freq_errs'], self.unpack_fkeys)
         self.unpack_amps(amp_lb, amp_ub, self.unpack_fkeys)
+        self.calc_mag()
 
     def load_shd(self):
         run_number = str(self.run_number).zfill(4)
@@ -95,5 +101,17 @@ class ShotFrame:
         for key in keys:
             col_name = 'amp' + '_' + key
             det_series = pd.Series([np.mean(data[l][key][lb:ub]) for l in self.det_labels], self.det_labels)
-            dark_series = pd.Series([np.nan for l in self.dark_labels], self.dark_labels)
+            dark_series = pd.Series([(det_series[l[0]] + det_series[l[1]])/2 for l in self.dark_labels],
+                                    self.dark_labels)
             self.shot_frame[col_name] = pd.concat([det_series, dark_series])
+
+    def calc_mag(self):
+        mag_list = ['H', 'N']
+        for i in mag_list:
+            amp_name = 'amp_' + i
+            mag_name = 'MT_' + i
+            kappa = kappa_rb['kappa_'+i]
+            mag_trans = self.shot_frame[amp_name]/C/(2/3*mu_0*kappa)
+            self.shot_frame[mag_name] = mag_trans
+        self.shot_frame['M0_H'] = self.shot_frame['MT_H']/np.sin(np.radians(list(self.shot_frame['he_angle'])))
+        self.shot_frame['M0_N'] = self.shot_frame['MT_N']/np.sin(np.radians(list(self.shot_frame['ne_angle'])))
