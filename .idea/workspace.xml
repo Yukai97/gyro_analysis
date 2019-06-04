@@ -1,59 +1,292 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b79fea75-1644-40f0-9a4b-93bca9bf4f3f" name="Default Changelist" comment="" />
+    <list id="88b97bc1-dc1b-43df-9a5d-2d0d853b200c" name="Default" comment="" />
+    <list id="66111114-251c-44c1-ba7b-faba7f89838e" name="res_max" comment="" />
+    <list default="true" id="b79fea75-1644-40f0-9a4b-93bca9bf4f3f" name="Default Changelist" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/gyro_analysis.iml" afterPath="$PROJECT_DIR$/.idea/gyro_analysis.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/local_path.py" afterPath="$PROJECT_DIR$/local_path.py" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FavoritesManager">
+    <favorites_list name="gyro_analysis" />
+  </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/PD_Analyzer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
-              <caret line="13" column="36" lean-forward="true" selection-start-line="13" selection-start-column="36" selection-end-line="13" selection-end-column="36" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <splitter split-orientation="horizontal" split-proportion="0.5509554">
+      <split-first>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file leaf-file-name="scfitter.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/scfitter.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="524">
+                  <caret line="374" column="0" lean-forward="false" selection-start-line="374" selection-start-column="0" selection-end-line="374" selection-end-column="0" />
+                  <folding>
+                    <element signature="e#0#18#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="local_path.py" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/local_path.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="357">
+                  <caret line="24" column="5" lean-forward="false" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="play_panda.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/play_panda.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="105">
+                  <caret line="8" column="15" lean-forward="false" selection-start-line="8" selection-start-column="15" selection-end-line="8" selection-end-column="15" />
+                  <folding>
+                    <element signature="e#0#19#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="rawfitter.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/rawfitter.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="210">
+                  <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+                  <folding>
+                    <element signature="e#0#11#0" expanded="true" />
+                    <marker date="1559163519181" expanded="true" signature="10491:10660" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="10678:14248" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="10683:11067" ph="&quot;&quot;&quot;Class storing data related to sine and cosine fit to the data...&quot;&quot;&quot;" />
+                    <marker date="1559163519181" expanded="true" signature="11168:11792" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="11839:11997" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="12028:12250" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="12288:12371" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="12405:13223" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="12526:13202" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13248:13398" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13312:13372" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13422:13590" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13611:13772" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13805:13930" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13963:14064" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="14097:14124" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="14157:14184" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="14220:14248" ph="..." />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="ganb.ipynb" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/ganb.ipynb">
+              <provider selected="true" editor-type-id="ipnb-editor">
+                <state>
+                  <selected id="3" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/__init__.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="75">
+                  <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+                  <folding>
+                    <marker date="1559163519173" expanded="true" signature="1132:1133" ph="..." />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file leaf-file-name="scfitter.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/scfitter.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="3780">
+                  <caret line="374" column="0" lean-forward="false" selection-start-line="374" selection-start-column="0" selection-end-line="374" selection-end-column="0" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="rawfitter.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/rawfitter.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="1485">
+                  <caret line="110" column="0" lean-forward="false" selection-start-line="110" selection-start-column="0" selection-end-line="110" selection-end-column="0" />
+                  <folding>
+                    <marker date="1559163519181" expanded="true" signature="10491:10660" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="10678:14248" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="10683:11067" ph="&quot;&quot;&quot;Class storing data related to sine and cosine fit to the data...&quot;&quot;&quot;" />
+                    <marker date="1559163519181" expanded="true" signature="11168:11792" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="11839:11997" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="12028:12250" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="12288:12371" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="12405:13223" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="12526:13202" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13248:13398" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13312:13372" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13422:13590" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13611:13772" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13805:13930" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="13963:14064" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="14097:14124" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="14157:14184" ph="..." />
+                    <marker date="1559163519181" expanded="true" signature="14220:14248" ph="..." />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="rawdata.py" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/rawdata.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="135">
+                  <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+                  <folding>
+                    <element signature="e#0#9#0" expanded="true" />
+                    <marker date="1559163519180" expanded="true" signature="2395:2546" ph="..." />
+                    <marker date="1559163519180" expanded="true" signature="2395:3947" ph="..." />
+                    <marker date="1559163519180" expanded="true" signature="2571:2696" ph="..." />
+                    <marker date="1559163519180" expanded="true" signature="2721:2856" ph="..." />
+                    <marker date="1559163519180" expanded="true" signature="2882:2993" ph="..." />
+                    <marker date="1559163519180" expanded="true" signature="3023:3156" ph="..." />
+                    <marker date="1559163519180" expanded="true" signature="3186:3282" ph="..." />
+                    <marker date="1559163519180" expanded="true" signature="3338:3549" ph="..." />
+                    <marker date="1559163519180" expanded="true" signature="3609:3947" ph="..." />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>rd</find>
+      <find>rd_</find>
+      <find>rd_e</find>
+      <find>rd_ex</find>
+      <find>rd_ex_</find>
+      <find>rd_e_in</find>
+      <find>rd__in</find>
+      <find>rd_in</find>
+      <find>locap</find>
+      <find>rd_ex_in</find>
+      <find>sp</find>
+      <find>lp.</find>
+      <find>locla</find>
+      <find>locl</find>
+      <find>local_pat</find>
+      <find>lo</find>
+      <find>loca</find>
+      <find>l</find>
+      <find>loc</find>
+      <find>local</find>
+      <find>local_opa</find>
+      <find>local_op</find>
+      <find>local_o</find>
+      <find>local_</find>
+      <find>local_p</find>
+      <find>local_pa</find>
+      <find>local_path</find>
+      <find>lp</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="William Terrano &lt;william.terrano@gmail.com&gt;" />
+      </list>
+    </option>
+    <option name="UPDATE_TYPE" value="MERGE" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dark_analysis" />
+      </map>
+    </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="160" />
-    <option name="y" value="123" />
-    <option name="width" value="960" />
-    <option name="height" value="738" />
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/test_phase_fit.py" />
+        <option value="$PROJECT_DIR$/test_blocks.py" />
+        <option value="$PROJECT_DIR$/darktime.py" />
+        <option value="$PROJECT_DIR$/threads.py" />
+        <option value="$PROJECT_DIR$/test_darktime.py" />
+        <option value="$PROJECT_DIR$/ganb.ipynb" />
+        <option value="$PROJECT_DIR$/pandas_play.py" />
+        <option value="$PROJECT_DIR$/play_panda.py" />
+        <option value="$PROJECT_DIR$/analyzer.py" />
+        <option value="$PROJECT_DIR$/shotinfo.py" />
+        <option value="$PROJECT_DIR$/rawdata.py" />
+        <option value="$PROJECT_DIR$/shotprocess.py" />
+        <option value="$PROJECT_DIR$/rawfitter.py" />
+        <option value="$PROJECT_DIR$/scfitter.py" />
+        <option value="$PROJECT_DIR$/local_path.py" />
+      </list>
+    </option>
   </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-1" />
+    <option name="y" value="23" />
+    <option name="width" value="1920" />
+    <option name="height" value="1054" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
-          <expand>
-            <path>
-              <item name="gyro_analysis" type="b2602c69:ProjectViewProjectNode" />
-              <item name="gyro_analysis" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gyro_analysis" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gyro_analysis" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -68,79 +301,663 @@
     </option>
   </component>
   <component name="RunManager">
-    <configuration name="rawfitter" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="gyro_analysis" />
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/rawfitter.py" />
+      <module name="gyro_analysis" />
+      <option name="SCRIPT_NAME" value="" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
+      <method />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.rawfitter" />
-      </list>
-    </recent_temporary>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="gyro_analysis" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Doctests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="gyro_analysis" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="gyro_analysis" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;.&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method />
+    </configuration>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="b79fea75-1644-40f0-9a4b-93bca9bf4f3f" name="Default Changelist" comment="" />
-      <created>1556733769753</created>
+      <changelist id="88b97bc1-dc1b-43df-9a5d-2d0d853b200c" name="Default" comment="" />
+      <changelist id="66111114-251c-44c1-ba7b-faba7f89838e" name="res_max" comment="" />
+      <created>1553923916717</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1556733769753</updated>
+      <updated>1553923916717</updated>
     </task>
+    <task id="LOCAL-00001" summary="Updated SClist to calculate phase at start and end from separate fits&#10;&#10;Tested that both fits (t_start = 0 and t_end = 0) give same &#10;frequencies, errors and residuals">
+      <created>1554330253338</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1554330253338</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Update rawfitter with res_max attribute and scfitter with new write_format&#10;&#10;Yukai -- the shd format changes with this update, I haven't updated RunAnalyzer to be compatible&#10;I also cleaned up various little things that were no longer needed -- i.e. ShotInfo removed from&#10;RawData and RawFitter">
+      <created>1554478374992</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1554478374992</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Update rawfitter with res_max attribute and scfitter with new write_format&#10;&#10;Yukai -- the shd format changes with this update, I haven't updated RunAnalyzer to be compatible&#10;I also cleaned up various little things that were no longer needed -- i.e. ShotInfo removed from&#10;RawData and RawFitter">
+      <created>1554478987437</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1554478987437</updated>
+    </task>
+    <task id="LOCAL-00004" summary="darktime fitter version 0.1 -- works and creates '.sho' file summarizing&#10;&#10;Needs -- documentation; improved user interaction.">
+      <created>1554814989175</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1554814989175</updated>
+    </task>
+    <task id="LOCAL-00005" summary="darktime fitter version 0.1 -- works and creates '.sho' file summarizing&#10;&#10;Needs -- documentation; improved user interaction.&#10;&#10;Significant changes to both function calls and output json file formats;&#10;sorry but had to happen.">
+      <created>1554815225068</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1554815225068</updated>
+    </task>
+    <task id="LOCAL-00006" summary="corrected phase error to account for slip. &#10;changed local_path structure">
+      <created>1559162947318</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1559162947318</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
+    <frame x="-1" y="23" width="1920" height="1054" extended-state="0" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Python Console" />
-      <window_info anchor="bottom" id="Terminal" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="R Packages" />
-      <window_info anchor="right" id="R Graphics" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1656017" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2827443" sideWeight="0.5085197" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32744282" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.49676898" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.36039603" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2827443" sideWeight="0.4914803" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2087327" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35068494" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
+    <layout-to-restore>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.503231" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32876712" sideWeight="0.49676898" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.36039603" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32739726" sideWeight="0.49676898" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35068494" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.17285945" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32970297" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2087327" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+    </layout-to-restore>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Updated SClist to calculate phase at start and end from separate fits&#10;&#10;Tested that both fits (t_start = 0 and t_end = 0) give same &#10;frequencies, errors and residuals" />
+    <MESSAGE value="Update rawfitter with res_max attribute and scfitter with new write_format&#10;&#10;Yukai -- the shd format changes with this update, I haven't updated RunAnalyzer to be compatible&#10;I also cleaned up various little things that were no longer needed -- i.e. ShotInfo removed from&#10;RawData and RawFitter" />
+    <MESSAGE value="darktime fitter version 0.1 -- works and creates '.sho' file summarizing&#10;&#10;Needs -- documentation; improved user interaction." />
+    <MESSAGE value="darktime fitter version 0.1 -- works and creates '.sho' file summarizing&#10;&#10;Needs -- documentation; improved user interaction.&#10;&#10;Significant changes to both function calls and output json file formats;&#10;sorry but had to happen." />
+    <MESSAGE value="corrected phase error to account for slip. &#10;changed local_path structure" />
+    <option name="LAST_COMMIT_MESSAGE" value="corrected phase error to account for slip. &#10;changed local_path structure" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <option name="time" value="2" />
+    </breakpoint-manager>
+    <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/PD_Analyzer.py">
+    <entry file="file://$PROJECT_DIR$/scfitter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="13" column="36" lean-forward="true" selection-start-line="13" selection-start-column="36" selection-end-line="13" selection-end-column="36" />
+        <state relative-caret-position="495">
+          <caret line="47" column="24" lean-forward="false" selection-start-line="47" selection-start-column="24" selection-end-line="47" selection-end-column="24" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="13" column="0" lean-forward="false" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding>
+            <marker date="1559163519173" expanded="true" signature="1132:1133" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_phase_fit.py" />
+    <entry file="file://$PROJECT_DIR$/darktime.py" />
+    <entry file="file://$PROJECT_DIR$/rawdata.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="30" column="42" lean-forward="false" selection-start-line="30" selection-start-column="42" selection-end-line="30" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <marker date="1559163519180" expanded="true" signature="2395:2546" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2395:3947" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2571:2696" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2721:2856" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2882:2993" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3023:3156" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3186:3282" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3338:3549" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3609:3947" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rawfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="38" column="0" lean-forward="false" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1559163519181" expanded="true" signature="10491:10660" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10678:14248" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10683:11067" ph="&quot;&quot;&quot;Class storing data related to sine and cosine fit to the data...&quot;&quot;&quot;" />
+            <marker date="1559163519181" expanded="true" signature="11168:11792" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="11839:11997" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12028:12250" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12288:12371" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12405:13223" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12526:13202" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13248:13398" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13312:13372" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13422:13590" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13611:13772" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13805:13930" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13963:14064" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14097:14124" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14157:14184" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14220:14248" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/analyzer.py" />
+    <entry file="file://$PROJECT_DIR$/shotinfo.py" />
+    <entry file="file://$PROJECT_DIR$/test_blocks.py" />
+    <entry file="file://$PROJECT_DIR$/test_darktime.py" />
+    <entry file="file://$PROJECT_DIR$/scfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="47" column="24" lean-forward="false" selection-start-line="47" selection-start-column="24" selection-end-line="47" selection-end-column="24" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rawfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="28" column="6" lean-forward="false" selection-start-line="28" selection-start-column="6" selection-end-line="28" selection-end-column="6" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1559163519181" expanded="true" signature="10491:10660" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10678:14248" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10683:11067" ph="&quot;&quot;&quot;Class storing data related to sine and cosine fit to the data...&quot;&quot;&quot;" />
+            <marker date="1559163519181" expanded="true" signature="11168:11792" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="11839:11997" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12028:12250" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12288:12371" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12405:13223" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12526:13202" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13248:13398" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13312:13372" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13422:13590" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13611:13772" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13805:13930" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13963:14064" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14097:14124" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14157:14184" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14220:14248" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <folding>
+            <marker date="1559163519173" expanded="true" signature="1132:1133" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rawdata.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="26" column="71" lean-forward="false" selection-start-line="26" selection-start-column="71" selection-end-line="26" selection-end-column="71" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <marker date="1559163519180" expanded="true" signature="2395:2546" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2395:3947" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2571:2696" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2721:2856" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2882:2993" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3023:3156" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3186:3282" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3338:3549" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3609:3947" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_phase_fit.py" />
+    <entry file="file://$PROJECT_DIR$/scfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_blocks.py" />
+    <entry file="file://$PROJECT_DIR$/test_darktime.py" />
+    <entry file="file://$PROJECT_DIR$/rawfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="28" column="6" lean-forward="false" selection-start-line="28" selection-start-column="6" selection-end-line="28" selection-end-column="6" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1559163519181" expanded="true" signature="10491:10660" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10678:14248" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10683:11067" ph="&quot;&quot;&quot;Class storing data related to sine and cosine fit to the data...&quot;&quot;&quot;" />
+            <marker date="1559163519181" expanded="true" signature="11168:11792" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="11839:11997" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12028:12250" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12288:12371" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12405:13223" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12526:13202" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13248:13398" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13312:13372" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13422:13590" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13611:13772" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13805:13930" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13963:14064" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14097:14124" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14157:14184" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14220:14248" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <folding>
+            <marker date="1559163519173" expanded="true" signature="1132:1133" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rawdata.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="26" column="71" lean-forward="false" selection-start-line="26" selection-start-column="71" selection-end-line="26" selection-end-column="71" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <marker date="1559163519180" expanded="true" signature="2395:2546" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2395:3947" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2571:2696" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2721:2856" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2882:2993" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3023:3156" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3186:3282" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3338:3549" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3609:3947" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_phase_fit.py" />
+    <entry file="file://$PROJECT_DIR$/scfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2865">
+          <caret line="191" column="0" lean-forward="false" selection-start-line="191" selection-start-column="0" selection-end-line="191" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_blocks.py" />
+    <entry file="file://$PROJECT_DIR$/test_darktime.py" />
+    <entry file="file://$PROJECT_DIR$/rawfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="28" column="6" lean-forward="false" selection-start-line="28" selection-start-column="6" selection-end-line="28" selection-end-column="6" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1559163519181" expanded="true" signature="10491:10660" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10678:14248" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10683:11067" ph="&quot;&quot;&quot;Class storing data related to sine and cosine fit to the data...&quot;&quot;&quot;" />
+            <marker date="1559163519181" expanded="true" signature="11168:11792" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="11839:11997" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12028:12250" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12288:12371" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12405:13223" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12526:13202" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13248:13398" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13312:13372" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13422:13590" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13611:13772" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13805:13930" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13963:14064" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14097:14124" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14157:14184" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14220:14248" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <folding>
+            <marker date="1559163519173" expanded="true" signature="1132:1133" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rawdata.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="26" column="71" lean-forward="false" selection-start-line="26" selection-start-column="71" selection-end-line="26" selection-end-column="71" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <marker date="1559163519180" expanded="true" signature="2395:2546" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2395:3947" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2571:2696" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2721:2856" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2882:2993" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3023:3156" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3186:3282" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3338:3549" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3609:3947" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_phase_fit.py" />
+    <entry file="file://$PROJECT_DIR$/scfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_blocks.py" />
+    <entry file="file://$PROJECT_DIR$/test_darktime.py" />
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/IPython/core/interactiveshell.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="155">
+          <caret line="2926" column="0" lean-forward="false" selection-start-line="2926" selection-start-column="0" selection-end-line="2926" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/posixpath.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="137">
+          <caret line="77" column="0" lean-forward="false" selection-start-line="77" selection-start-column="0" selection-end-line="77" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/numpy/lib/npyio.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="129">
+          <caret line="851" column="0" lean-forward="false" selection-start-line="851" selection-start-column="0" selection-end-line="851" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/urllib/parse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="137">
+          <caret line="773" column="0" lean-forward="false" selection-start-line="773" selection-start-column="0" selection-end-line="773" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_blocks.py" />
+    <entry file="file://$PROJECT_DIR$/test_phase_fit.py" />
+    <entry file="file://$PROJECT_DIR$/darktime.py" />
+    <entry file="file://$PROJECT_DIR$/threads.py" />
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+          <folding>
+            <marker date="1559163519173" expanded="true" signature="1132:1133" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_darktime.py" />
+    <entry file="file://$PROJECT_DIR$/ganb.ipynb">
+      <provider selected="true" editor-type-id="ipnb-editor">
+        <state>
+          <selected id="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/play_panda.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="8" column="15" lean-forward="false" selection-start-line="8" selection-start-column="15" selection-end-line="8" selection-end-column="15" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/analyzer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="6" column="34" lean-forward="false" selection-start-line="6" selection-start-column="34" selection-end-line="6" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#18#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/shotinfo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="22" column="2" lean-forward="false" selection-start-line="22" selection-start-column="2" selection-end-line="22" selection-end-column="2" />
+          <folding>
+            <element signature="e#0#11#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rawdata.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <marker date="1559163519180" expanded="true" signature="2395:2546" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2395:3947" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2571:2696" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2721:2856" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="2882:2993" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3023:3156" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3186:3282" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3338:3549" ph="..." />
+            <marker date="1559163519180" expanded="true" signature="3609:3947" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rawfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1559163519181" expanded="true" signature="10491:10660" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10678:14248" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="10683:11067" ph="&quot;&quot;&quot;Class storing data related to sine and cosine fit to the data...&quot;&quot;&quot;" />
+            <marker date="1559163519181" expanded="true" signature="11168:11792" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="11839:11997" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12028:12250" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12288:12371" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12405:13223" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="12526:13202" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13248:13398" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13312:13372" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13422:13590" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13611:13772" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13805:13930" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="13963:14064" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14097:14124" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14157:14184" ph="..." />
+            <marker date="1559163519181" expanded="true" signature="14220:14248" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/shotprocess.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="127">
+          <caret line="38" column="42" lean-forward="false" selection-start-line="38" selection-start-column="40" selection-end-line="38" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#18#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scfitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="524">
+          <caret line="374" column="0" lean-forward="false" selection-start-line="374" selection-start-column="0" selection-end-line="374" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/local_path.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="24" column="5" lean-forward="false" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>

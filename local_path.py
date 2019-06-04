@@ -3,6 +3,7 @@ import os
 
 
 class paths:
+
     homedir = r"D:\gyro_data\Data"
     rawdir = os.path.join(homedir, 'Raw data')
     infodir = os.path.join(homedir, 'Info data')
