@@ -20,7 +20,7 @@ class RunDataFrame:
         self.amp_ub = amp_ub
         self.fkeys = ['CP', 'H', 'N', 'X']
         self.markers = {'H': '^', 'N': 'v', 'X': 'x', 'CP': 'o'}
-        if run_number:
+        if not shot_frame_list:
             self.shot_frame_list = self.build_shot_frame_list(run_number)
         else:
             self.shot_frame_list = shot_frame_list
@@ -52,7 +52,6 @@ class RunDataFrame:
         run_frame = run_frame.reset_index()
         run_number = list(set(run_frame['run_number']))
         labels = list(set(run_frame['label']))
-        run_frame = run_frame.set_index(['run_number', 'shot_number', 'label'])
         return run_number, labels, run_frame
 
     def plot_freqs_shot(self):
