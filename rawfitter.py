@@ -32,7 +32,7 @@ class RawFitter:
     """
 
     def __init__(self, rawdata: RawData, block_length=40 / fH,
-                 freqs2fit=freqlist):
+                 freqs2fit=freqlist, wC=False):
         """
 
         :type rawdata: RawData class
@@ -43,7 +43,7 @@ class RawFitter:
         self.bl = block_length  # in seconds
         self.freqs2fit = freqs2fit
         self.nb = int((rawdata.time[-1] - rawdata.time[0]) / block_length)
-        self.base_fit = self.set_fitting_freqs(freqs2fit)
+        self.base_fit = self.set_fitting_freqs(wC, freqs2fit)
         self.blist = self.init_blocks()
         self.fit_span = self.blist[-1].end - self.blist[0].start
         self.time = self.time[:int(self.fit_span)]
@@ -80,14 +80,14 @@ class RawFitter:
             bl_list.append(b)
         return bl_list
 
-    def set_fitting_freqs(self, f2f=None):
+    def set_fitting_freqs(self, wC, f2f=None):
         if f2f is None:
             f2f = self.get_freqs()
         wantX = False
         if 'X' in f2f:
             wantX = True
         harms = list(set(f2f) - set(['X', 'C']))
-        return RawBlock(wH=default_freq['wH'], wN=default_freq['wN'], wX=wantX, wHarm=harms)
+        return RawBlock(wH=default_freq['wH'], wN=default_freq['wN'], wX=wantX, wC=wC, wHarm=harms)
 
     @property
     def starts(self):

@@ -188,8 +188,11 @@ class SClist:
         for i in atoms:
             amps = self.amps[i]
             t = self.time
-            popt, pcov = opt.curve_fit(exp_decay, t, amps, initial_guess[i])
-            T2[i] = 1/popt[1]
+            try:
+                popt, pcov = opt.curve_fit(exp_decay, t, amps, initial_guess[i])
+                T2[i] = 1/popt[1]
+            except RuntimeError:
+                T2[i] = 'nan'
         return T2
 
     def fit_phases(self):

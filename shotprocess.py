@@ -10,6 +10,7 @@ from gyro_analysis.scfitter import SClist
 from gyro_analysis.scfitter import ScoReader
 from gyro_analysis.shotinfo import ShotInfo
 from gyro_analysis import ddict, default_freq
+from gyro_analysis import freqlist
 from gyro_analysis.local_path import paths as lp
 from gyro_analysis.local_path import extensions as ext
 
@@ -27,7 +28,7 @@ class ShotProcess:
     """
 
     def __init__(self, run_number, shot_number, detection_times=None, block_outlier={}, fitting_paras=ddict,
-                 check_raw=False, check_phases=False):
+                 check_raw=False, check_phases=False, freq2fit=freqlist, wC=False):
         """ detection_times is 2xN list of detection times
 
         keywords 'check_xxx' allow user to have validation plots displayed
@@ -46,7 +47,7 @@ class ShotProcess:
         self.block_outlier.update(block_outlier)
         self.abs_res_max = np.zeros(self.n_det)
         self.dark_time_dict = self.init_dark_time()
-        self.process_rdt_to_rfo()
+        self.process_rdt_to_rfo(freq2fit=freq2fit, wC=wC)
         if check_raw:
             self.check_raw_res()
         tdict = self.process_rfo_to_sco()
@@ -77,13 +78,13 @@ class ShotProcess:
         print('check_phase_res not yet implemented')
         return
 
-    def process_rdt_to_rfo(self):
+    def process_rdt_to_rfo(self, freq2fit, wC):
         """ run fitters on each detection time and write output files """
         fp = self.parameters
         for i in self.narr:
             fp['roi'] = self.det_times[i]
             rd = RawData(self.run_number, self.shot_number, fp)
-            rf = RawFitter(rd)
+            rf = RawFitter(rd, freqs2fit=freq2fit, wC=wC)
             rf.process_blocks()
             self.abs_res_max[i] = rf.abs_res_max
             rf.write_json(l=self.det_labels[i])
@@ -128,6 +129,7 @@ class ShotProcess:
                 temp_dark[ldark]['phase_diff_err'][species] = phdiff_err
                 temp_dark[ldark]['freq'][species] = phdiff/time_dark
                 temp_dark[ldark]['freq_err'][species] = phdiff_err/time_dark
+            temp_dark[ldark]['label'] = ldark
         return temp_dark
 
     def process_sco_to_shd(self):
@@ -144,9 +146,9 @@ class ShotProcess:
             key = k1 + k2
             dark_time_length = self.det_times[i + 1][0] - self.det_times[i][1]
             temp_dict[key] = dict(time_diff=dark_time_length, time_start=self.det_times[i][1],
-                                       time_end=self.det_times[i + 1][0],
-                                       phase_diff={}, phase_diff_err={},
-                                       freq={}, freq_err={})
+                                  time_end=self.det_times[i + 1][0], phase_diff={}, phase_diff_err={}, freq={},
+                                  freq_err={}, dark_start_phase={}, dark_start_err={}, dark_end_phase={},
+                                  dark_end_err={})
             return temp_dict
 
     def load_detection_time(self):
@@ -180,5 +182,3 @@ class ShotProcess:
         ax.set_ylabel('Residual')
         ax.set_title('Maximum Residual Seen in Block Fitting')
         plt.show()
-
-so = ShotProcess(33, 0, [[25,125], [225, 325]])
